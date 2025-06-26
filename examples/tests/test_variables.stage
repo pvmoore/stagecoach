@@ -1,0 +1,116 @@
+
+import console = core/console
+
+public fn testVariables() {
+    locals()
+    globals()
+    consts()
+    
+
+}
+
+fn locals() {
+    bool a;         assert(a is false); assert(::typeOf(a) is bool)
+    byte b;         assert(b is 0);     assert(::typeOf(b) is byte)
+    short c;        assert(c is 0);     assert(::typeOf(c) is short)
+    int d = 2;      assert(d is 2);     assert(::typeOf(d) is int)
+    long e = 3;     assert(e is 3);     assert(::typeOf(e) is long)
+    float f;        assert(f is 0.0);   assert(::typeOf(f) is float)
+    double g = 5.0; assert(g is 5.0);   assert(::typeOf(g) is double)
+
+    int* h;         assert(h is null);  assert(::typeOf(h) is int*)
+
+    fn()->void f1;  assert(f1 is null); assert(::typeOf(f1) is fn()->void)
+
+
+    //int b2 = 2.1   // error - variable initialiser type mismatch
+
+    // int a = 3    // error - variable shadowing
+}
+
+fn globals() {
+    assert(tv_g_a is false)
+    assert(tv_g_b is 1)     
+    assert(tvFuncPtr is null)
+}
+fn consts() {
+    int a = '#'                 assert(::isConst(a) is false)
+    const int aa = '#';         assert(::isConst(aa))
+
+    int[2] b;                   assert(::isConst(b) is false)
+                                assert(::isConst(b[0]) is false)
+
+    const int[2] c = [1, 2];    assert(::isConst(c))
+                                assert(::isConst(c[0]))
+                                assert(::isConst(c[1]))
+
+    b[0] = 12       
+    //c[0] = 12         // error - modifying a const
+
+    int* d = &a         // pointer to int
+    int* e = &aa        // pointer to const int   
+
+    // modifying a const through a pointer is allowed by the compiler but not recommended
+    *d = '@';           assert(a is '@')
+    *e = '@';           assert(aa is '@')   
+
+    const E1 e1 = E1.A
+    //e1 = E1.B         // error - modifying a const
+
+    const struct{int a} g1 = { 1 }
+    //g1 = { 2 }        // error - modifying a const
+
+    //struct{const int a} g2            // error - const members not allowed
+    //struct{const int a} g3 = { 1 }    // error - const members not allowed
+
+    //E2 e2 = { 1, 2 }    // error - initialising struct with wrong number of arguments (const members do not count)
+    
+    E2 e2 
+    assert(e2.b is 9)
+    assert(::isConst(e2.a) is false)
+    assert(::isConst(e2.b))
+
+    //g_a += 1    // error - modifying a const
+    //aa += 1  // error - modifying a const
+    //const int a // error - const not initialised
+}
+
+fn constParam(const int a) {
+    //a += 1  // error - modifying a const
+}
+
+struct E2 {
+    int a
+    //const int b // this must be initialised
+    const int b = 9
+}
+
+enum E1 { A, B }
+
+// error - duplicate parameter names
+//fn tvFoo2(int a, int b, int a) -> void {}
+
+// error - variable shadowing
+// fn tvFoo3(int a, int b, int c) -> void {
+//     int a = 3
+// }
+
+// error - variable shadowing
+// fn tvFoo4(int a, int b, int c) -> void {
+//     int tv_g_a = 3
+// }
+
+// Global variables
+bool tv_g_a
+int tv_g_b = 1
+
+//const int g_a // error - const not initialised
+const int g_a = 7
+
+// error - variable shadowing
+//int tv_g_a = 2
+
+// Global variable function ptr
+fn()->void tvFuncPtr
+
+

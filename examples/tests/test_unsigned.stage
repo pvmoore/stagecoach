@@ -1,0 +1,86 @@
+
+public fn testUnsigned() {
+    assert(::sizeOf(0) is 1)
+    assert(::sizeOf(0xff) is 1)
+    assert(::sizeOf(0x1ff) is 2)
+    assert(::sizeOf(0xffffffff) is 4)
+    assert(::sizeOf(0x1ffffffff) is 8)
+    assert(::sizeOf(-128) is 1)
+    assert(::sizeOf(-129) is 2)
+    assert(::sizeOf(-32768) is 2)
+    assert(::sizeOf(-32769) is 4)
+    assert(::sizeOf(-2147483648) is 4)
+    assert(::sizeOf(-2147483649) is 8)
+
+    int a = 8           assert(::sizeOf(a) is 4)
+    int b = 0xffffffff; assert(b is -1); assert(::sizeOf(b) is 4)
+    bool c              assert(::sizeOf(c) is 1)
+
+    // >> ushr
+    assert(a >> 1 is 4)
+    assert(a ushr 1 is 4)
+    assert(a << 1 is 16)
+
+    assert(b >> 1 is 0xffffffff)
+    assert(b ushr 1 is 0x7fffffff)
+
+    // >>= ushr=
+    a >>= 1; assert(a is 4)
+    a <<= 1; assert(a is 8)
+    b >>= 1; assert(b is 0xffffffff)
+    b <<= 1; assert(b is 0xfffffffe)
+
+    b = 0xffffffff
+    b ushr= 1; assert(b is 0x7fffffff)
+
+    // /, udiv
+    int d = 0xffffffff
+    int e = -1
+    assert(d udiv 2 is 0x7fffffff)
+    assert(e / 2 is 0)
+
+    // /=, udiv=
+    d udiv= 2
+    e /= 2
+    assert(d is 0x7fffffff)
+    assert(e is 0)
+
+    // %, umod
+    d = 0xffffffff
+    e = -1
+    assert(d umod 2 is 1)
+    assert(e % 2 is -1)
+
+    // %=, umod=
+    d umod= 2
+    e %= 2
+    assert(d is 1)
+    assert(e is -1)
+
+    // <, ult
+    assert(1 < 10)
+    assert(-10 < 1)
+    assert(1 ult 10)
+    assert(-10 ult 1 is false)
+
+    // >, ugt
+    assert(10 > 1)
+    assert(1 > -10)
+    assert(10 ugt 1)
+    assert(1 ugt -10 is false)
+
+    // <=, ulte
+    assert(1 <= 10)
+    assert(-10 <= 1)
+    assert(1 ulte 10)
+    assert(-10 ulte 1 is false)
+
+    // >=, ugte
+    assert(10 >= 1)
+    assert(1 >= -10)
+    assert(10 ugte 1)
+    assert(1 ugte -10 is false)
+
+    // unsigned vs real is not allowed
+    //assert(1.0 ult 10.0)
+}

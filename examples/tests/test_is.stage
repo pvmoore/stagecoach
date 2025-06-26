@@ -1,0 +1,61 @@
+
+public fn testIs() {
+    int a = 1
+    byte b = 2
+
+    int* bb;      assert(bb is null)  
+    //@assert bb is not not null // double negation is not allowed
+
+    // Type is Type 
+    bool c = int is int;        assert(c)
+    bool d = int is not int;    assert(d is false) 
+    assert(int is int)
+    assert(int is not bool)
+
+    // Type is Expression (not allowed - use ::typeOf)
+    // Expression is Type (not allowed - use ::typeOf)
+    //e:bool = int is a
+    //f:bool = a is int
+
+    bool e1 = int is ::typeOf(a);       assert(e1)
+    bool e2 = ::typeOf(a) is int;       assert(e2)
+    bool e3 = ::typeOf(a) is not byte;  assert(e3)
+
+    // Pointer is pointer
+    int* f1 = null
+    int* f2 = &a
+    byte* f3 = &b
+    int* f4 = &a
+    assert(f1 is not f2)
+    assert(f2 is not f3)
+    assert(f4 is f2)
+
+    // Pointer is value (always false)
+    assert(f1 is not a)
+    assert(f2 is not a)
+    assert(f3 is not b)
+    assert(f4 is not a)
+
+    // Expression is Expression
+    assert(a is a)
+    assert(a is 1)
+    assert(1 is a)
+    assert(1 is not 2)
+    assert(b is 2)
+    assert(a is not b)
+
+    // Array is Array
+    int[2] g1 = [1, 2]
+    int[2] g2 = [1, 2]
+    int[2] g3 = [3, 4]
+    assert(g1 is g2)
+    assert(g2 is not g3)
+
+    // Array is int (not allowed)
+    // Value is Array (not allowed)
+    assert(g1 is not a)          
+    assert(a is not g1)  
+
+    // Ambiguous 'is' expressions
+    //b:bool = 1 is 1 is not true        
+}

@@ -1,0 +1,58 @@
+
+import console = core/console
+
+public:
+
+alias QualInt = int
+
+enum QualEnum {
+    A
+    B
+    C
+}
+
+fn qual_f1() -> int {
+    console.println("qual_f1")
+    return 1
+}
+
+fn qual_f2(int a) -> int {
+    console.print("qual_f2 ")
+    console.println(a); 
+    return 2
+}
+
+// Function ptr
+fn()->int qual_v1 = qual_f1 
+
+// Function ptr
+fn(int)->int qual_v2 = qual_f2
+
+struct QualGreen {
+    int a
+    public int b
+    int c
+public:
+    int d
+    private int e
+    int f
+private:
+    int g
+}
+
+private:
+
+//-------------------------------------------------------- private symbols:
+
+alias QualShort = short 
+
+enum QualEnum2 {
+    A
+    B
+}
+
+fn qual_f3() -> int {
+    return 3
+}
+
+fn()->int qual_v3 = qual_f3

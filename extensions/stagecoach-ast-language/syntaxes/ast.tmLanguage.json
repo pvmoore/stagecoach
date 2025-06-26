@@ -1,0 +1,136 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "canast",
+	"patterns": [
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#strings-double"
+		},
+		{
+			"include": "#strings-single"
+		},
+		{
+			"include": "#number-literals"
+		},
+		{
+			"include": "#double-colon"
+		},
+		{
+			"include": "#module-reference"
+		}
+	],
+	"repository": {
+		"keywords": {
+			"patterns": [
+				{
+					"match": "\\b(location)(\\*+|\\b)",
+					"name": "entity.name.tag.ast"
+				},
+				{
+					"match": "\\b(const|if|while|return|import|assert|not|is|as|and|or|else|break|continue|loop|select|var)\\b",
+					"name": "keyword.control.ast"
+				},
+				{
+					"match": "\\b(bool|byte|ubyte|short|ushort|int|uint|long|ulong|float|double|void|struct|union|enum|fn|ptr)(\\*+|\\b)",
+					"name": "storage.type.ast"
+				},
+				{
+					"match": "\\b(Alias|AddressOf|As|Binary|Builtin|Break|Call|Case|Continue|Dot|Enum|EnumMember|Function|Identifier|Import|Index|Is|ModuleRef|NodeRef|Target|ArrayLiteral|StructLiteral|Null|Number|Module|ModuleId|Return|Scope|Struct|TypeRef|Unary|Union|ValueOf|Variable)(\\*+|\\b)",
+					"name": "keyword.control.ast"
+				},
+				{
+					"match": "\\b(unresolved)\\b",
+					"name": "error.ast"
+				},
+				{
+					"match": "\\b(pub)\\b",
+					"name": "storage.modifier.ast"
+				},
+				{
+					"match": "@[_\\w]+\\b",
+					"name": "support.function.ast"
+				},
+				{
+					"match": "\\[\\[.*\\]\\]",
+					"name": "entity.name.tag.ast"
+				},
+				{
+					"match": "\\b(true|false|null)(\\**|\\b)",
+					"name": "constant.numeric"
+				},
+				{
+					"match": "\\b(this)(\\**|\\b)",
+					"name": "entity.other.this.ast"
+				}
+			]
+		},
+		"number-literals": {
+			"patterns": [
+				{
+					"match": "\\b([\\d_]+\\.[\\d_]+(f|d|h)?)\\b",
+					"name": "constant.numeric.float"
+				},
+				{
+					"match": "\\b[\\d_]+\\b",
+					"name": "constant.numeric"
+				},
+				{
+					"match": "\\b0b[0-1_]+\\b",
+					"name": "constant.numeric.binary"
+				},
+				{
+					"match": "\\b0x[\\d_a-fA-F]+\\b",
+					"name": "constant.numeric.hex"
+				}
+			]
+		},
+		"strings-double": {
+			"begin": "'",
+			"end": "'",
+			"name": "string.quoted.double.ast",
+			"patterns": [
+				{
+					"match": "\\\\.",
+					"name": "constant.character.escape.ast"
+				}
+			]
+		},
+		"strings-single": {
+			"begin": "\"",
+			"end": "\"",
+			"name": "string.quoted.single.ast",
+			"patterns": [
+				{
+					"match": "\\\\.",
+					"name": "constant.character.escape.ast"
+				}
+			]
+		},
+		"double-colon": {
+			"patterns": [
+				{
+					"match": "::",
+					"name": "punctuation.double-colon.stage1"
+				}
+			]
+		},
+		"module-reference": {
+			"patterns": [
+				{
+					"captures": {
+						"1": {
+							"name": "storage.type.module_reference.stage1"
+						},
+						"2": {
+							"name": "punctuation.double-colon.stage1"
+						}
+					},
+					"match": "\\b([_a-zA-Z][_a-zA-Z0-9]+)(::)"
+				}
+			]
+		}
+	},
+	"scopeName": "source.ast"
+}

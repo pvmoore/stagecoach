@@ -1,0 +1,399 @@
+
+import qual = tests/imports/qualified
+import tests/imports/unqualified
+
+public fn testStructs() {
+    defaultInitialisation()
+    opaque()
+    withConsts()
+    structLiterals()
+    arrayOfStructs()
+    structIsStruct()
+    visibility()
+
+    // Struct values
+    Apple apple
+
+    apple.a = '@';              assert(apple.a is '@')
+    apple.b = 2.0;              assert(apple.b is 2.0)
+
+    int z = apple.a;            assert(z is '@')
+    int* z2 = &apple.a;         assert(*z2 is '@')
+
+    // Struct pointers
+    Apple* applePtr;            assert(applePtr is null)
+
+    // todo - dereferencing null pointer. 
+    // This should trigger the null check assert if options.enableNullChecks is true
+    //applePtr.a = '#' 
+
+    Apple* applePtr2 = &apple;  assert(applePtr2 is &apple)
+
+    applePtr2.a = '#';          
+    assert(applePtr2.a is '#')  
+    assert(apple.a is '#')
+
+      
+
+    // Struct within Struct
+    Apple applez1
+    Apple applez2
+    Pear pear
+    pear.apple = applez1;
+    pear.applePtr = &applez2;
+
+    Apple* a = &applez2
+    assert(*a is applez2)
+
+    assert(pear.apple is applez1)
+    assert(pear.applePtr is &applez2)
+    assert(*pear.applePtr is applez2)
+}
+
+fn putchar(int) -> int
+
+fn defaultInitialisation() {
+
+    Apple apple8
+
+    assert(apple8.a is 0)
+    assert(apple8.b is 0.0)
+    assert(apple8.c is true)
+
+    Pear pear4
+
+    assert(pear4.apple.a is 0)
+    assert(pear4.apple.b is 0.0)
+    assert(pear4.apple.c is true)
+    assert(pear4.applePtr is null)
+
+    assert(g_apple.a is 0)
+    assert(g_apple.b is 0.0)
+    assert(g_apple.c is true)
+
+    assert(g_pear.apple.a is 0)
+    assert(g_pear.apple.b is 0.0)
+    assert(g_pear.apple.c is true)
+    assert(g_pear.applePtr is null)
+
+    // Set default values
+    Apple apple4a = {a:1}
+    assert(apple4a.a is 1)
+    assert(apple4a.b is 0.0)
+    assert(apple4a.c is true)
+
+    Fig fig
+    assert(::alignOf(fig) is 8)
+    assert(::alignOf(fig.a) is 4)
+    assert(::alignOf(fig.b) is 4)
+    assert(::alignOf(fig.c) is 1)
+    assert(::alignOf(fig.d) is 2)
+    assert(::alignOf(fig.e) is 1)
+    assert(::alignOf(fig.f) is 8)
+
+    //assert(::offsetOf(fig) is 0) // error - not a struct member
+    //assert(::offsetOf(Fig) is 0)   // error - not a struct member
+
+    assert(::offsetOf(fig.a) is 0)
+    assert(::offsetOf(fig.b) is 4)
+    assert(::offsetOf(fig.c) is 8)
+    assert(::offsetOf(fig.d) is 10)
+    assert(::offsetOf(fig.e) is 12)
+    assert(::offsetOf(fig.f) is 16)
+
+    assert(::offsetOf(Fig.a) is 0)
+    assert(::offsetOf(Fig.b) is 4)
+    assert(::offsetOf(Fig.c) is 8)
+    assert(::offsetOf(Fig.d) is 10)
+    assert(::offsetOf(Fig.e) is 12)
+    assert(::offsetOf(Fig.f) is 16)
+
+    // nested struct members
+    Gnat gnat
+    assert(::sizeOf(gnat) is 1)
+    assert(::alignOf(gnat) is 1)
+    assert(::offsetOf(gnat.a) is 0)
+
+    Chicken chicken
+    assert(::sizeOf(chicken) is 8)
+    assert(::alignOf(chicken) is 4)
+    assert(::offsetOf(chicken.a) is 0)
+    assert(::offsetOf(chicken.b) is 4)
+    assert(::offsetOf(chicken.c) is 6)
+
+    Egg egg
+    assert(::sizeOf(egg) is 16)
+
+    assert(::offsetOf(egg.a) is 0)
+    assert(::offsetOf(egg.b) is 4)
+    assert(::offsetOf(egg.c) is 12)
+
+    assert(::offsetOf(egg.b.a) is 0)
+    assert(::offsetOf(egg.b.b) is 4)
+    assert(::offsetOf(egg.b.c) is 6)
+
+    // Packed structs
+    Blueberry blueberry
+    assert(::sizeOf(blueberry) is 15)
+    assert(blueberry.a is 7)
+    assert(blueberry.b is 0)
+    assert(blueberry.c is 0.0)
+    assert(blueberry.d is 0)
+
+    assert(::alignOf(blueberry) is 8)
+    assert(::alignOf(blueberry.a) is 4)
+    assert(::alignOf(blueberry.b) is 1)
+    assert(::alignOf(blueberry.c) is 8)
+    assert(::alignOf(blueberry.d) is 2)
+
+    Small small
+    assert(::sizeOf(small) is 1)
+    assert(::alignOf(small) is 1)
+}
+
+fn structLiterals() {
+    // Struct literal containing struct literal
+    Pear pear2 = { apple: { a: 1, b: 1.0 } }
+    assert(pear2.apple.a is 1)
+    assert(pear2.apple.b is 1.0)
+    assert(pear2.apple.c is true)
+    assert(pear2.applePtr is null)
+
+    // Struct literal containing null pointer
+    Pear pear3 = { applePtr: null }
+    assert(pear3.applePtr is null)
+
+    // Set default values
+    Apple apple7 = {c: false}
+    assert(apple7.a is 0)
+    assert(apple7.b is 0.0)
+    assert(apple7.c is false)
+
+    Orange orange = { y: 3 }
+    assert(orange.x is 7)
+    assert(orange.y is 3.0)
+
+    // Struct literals (unnamed arguments)
+    Apple apple4 = {a:'p', b:1.0}
+    assert(apple4.a is 'p')
+    assert(apple4.b is 1.0)
+
+    // Struct literals (named arguments)
+    Apple apple5 = {a: 1, b: 1.0}
+    assert(apple5.a is 1)
+    assert(apple5.b is 1.0)
+
+    Apple apple6 = {b: 3.14, a: 2}
+    assert(apple6.a is 2)
+    assert(apple6.b is 3.14)
+
+    // error - Cannot implicitly convert float to int
+    //Apple apple4a = {1.0, 1.1} 
+
+    // error - Mixing named and unnamed arguments
+    //Apple apple4b = {a: 'p', 1.0} 
+
+    // error - too many arguments
+    //Apple apple4c = {'p', 1.0, 2.0} 
+}
+
+fn opaque() -> void {
+    TNSOpaque o
+    assert(::sizeOf(o) is 0)
+    assert(::alignOf(o) is 1)
+}
+
+fn arrayOfStructs() {
+    // Array of structs
+    Small[2] smallArray
+    assert(::sizeOf(smallArray) is 2)
+    assert(::alignOf(smallArray) is 1)
+}
+
+fn structIsStruct() {
+    // Struct is Struct
+    Apple applez1
+    Apple applez2
+    Apple applez3
+
+    applez1.a = 1;
+    applez1.b = 1.0;
+
+    applez2.a = 2;
+    applez2.b = 2.0;
+
+    applez3.a = 1;
+    applez3.b = 1.0;
+
+    assert(applez1 is not applez2)  
+    assert(applez1 is applez3) 
+}
+
+struct Person {
+    int age
+    const bool isHuman = true
+    int height  
+}
+
+fn withConsts() {
+    Person person = { age: 10, height: 180 }
+    assert(person.age is 10)
+    assert(person.height is 180)
+    assert(person.isHuman is true)
+
+    bool a = Person.isHuman;    assert(a is true)
+}
+
+struct Green {
+    int a           // private
+    public int b    // public
+    int c           // private
+public: 
+    int d           // public
+    private int e   // private
+    int f           // public
+private:
+    int g           // private
+}
+
+fn visibility() {
+    Green green
+    assert(::isPublic(green.a) is false)
+    assert(::isPublic(green.b))
+    assert(::isPublic(green.c) is false)
+    assert(::isPublic(green.d))
+    assert(::isPublic(green.e) is false)
+    assert(::isPublic(green.f))
+    assert(::isPublic(green.g) is false)
+
+    assert(::isPublic(Green.a) is false)
+    assert(::isPublic(Green.b))
+    assert(::isPublic(Green.c) is false)
+    assert(::isPublic(Green.d))
+    assert(::isPublic(Green.e) is false)
+    assert(::isPublic(Green.f))
+    assert(::isPublic(Green.g) is false)
+
+    // Local private struct members should be visible here
+    green.a = 1
+    green.b = 1
+    green.c = 1
+    green.d = 1
+    green.e = 1
+    green.f = 1
+    green.g = 1
+
+    Green green2 = { a:1, b:1, c:1, d:1, e:1, f:1, g:1 }
+
+    qual.QualGreen qg
+    assert(::isPublic(qg.a) is false)
+    assert(::isPublic(qg.b))
+    assert(::isPublic(qg.c) is false)
+    assert(::isPublic(qg.d))
+    assert(::isPublic(qg.e) is false)
+    assert(::isPublic(qg.f))
+    assert(::isPublic(qg.g) is false)
+
+    assert(::isPublic(qual.QualGreen.a) is false)
+    assert(::isPublic(qual.QualGreen.b))
+    assert(::isPublic(qual.QualGreen.c) is false)
+    assert(::isPublic(qual.QualGreen.d))
+    assert(::isPublic(qual.QualGreen.e) is false)
+    assert(::isPublic(qual.QualGreen.f))
+    assert(::isPublic(qual.QualGreen.g) is false)
+
+    // External module private struct members are not visible here
+    //qg.a = 1    // error - not visible
+    qg.b = 1    
+    //qg.c = 1    // error - not visible
+    qg.d = 1    
+    //qg.e = 1    // error - not visible
+    qg.f = 1    
+    //qg.g = 1    // error - not visible
+
+    // error - some of these members are not visible
+    //qual.QualGreen qg2 = { b:1, d:1, f:1, g:1 }
+
+    UnqualGreen ug
+    assert(::isPublic(ug.a) is false)
+    assert(::isPublic(ug.b))
+    assert(::isPublic(ug.c) is false)
+    assert(::isPublic(ug.d))
+    assert(::isPublic(ug.e) is false)
+    assert(::isPublic(ug.f))
+    assert(::isPublic(ug.g) is false)
+
+    assert(::isPublic(UnqualGreen.a) is false)
+    assert(::isPublic(UnqualGreen.b))
+    assert(::isPublic(UnqualGreen.c) is false)
+    assert(::isPublic(UnqualGreen.d))
+    assert(::isPublic(UnqualGreen.e) is false)
+    assert(::isPublic(UnqualGreen.f))
+    assert(::isPublic(UnqualGreen.g) is false)
+
+    //ug = { a:1, b:1, d:1, e:1, f:1 }   // error - some of these members are not visible
+}
+
+struct TNSOpaque {}
+
+Apple g_apple
+Pear g_pear
+
+struct Apple {
+    int a
+    float b
+    bool c = true
+}
+struct Pear {
+    Apple apple
+    Apple* applePtr
+}
+struct Orange {
+    short x = 7
+    float y = 8
+}
+#(packed)
+struct Blueberry { // size = 15 (would be 8 without packed)
+    int a = 7
+    byte b
+    double c
+    short d
+}
+struct Small {
+    byte a
+}
+struct Fig {
+    int a
+    float b
+    bool c
+    short d
+    byte e
+    long f
+}
+struct Gnat {
+    byte a
+}
+struct Chicken {
+    int a
+    bool b
+    short c
+}
+struct Egg {
+    bool a
+    Chicken b
+    int c
+}
+struct Banana {
+    int a = 7
+}
+
+struct Float3 {
+    float x
+    float y
+    float z
+ }
+
+fn newFloat3(float x, float y, float z) -> Float3 {
+    return {x:x, y:y, z:z}
+}
+

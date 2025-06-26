@@ -1,0 +1,35 @@
+{
+    "name": "candle-lang",
+    "displayName": "Candle",
+    "description": "Candle language syntax highlighting support",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.38.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "contributes": {
+        "languages": [
+            {
+                "id": "stage1",
+                "aliases": [
+                    "stage1"
+                ],
+                "extensions": [
+                    ".stage1",
+                    ".stage",
+                    ".stg"
+                ],
+                "configuration": "./language-configuration.json"
+            }
+        ],
+        "grammars": [
+            {
+                "language": "stage1",
+                "scopeName": "source.stage1",
+                "path": "./syntaxes/stage1.tmLanguage.json"
+            }
+        ]
+    }
+}

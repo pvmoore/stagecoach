@@ -1,0 +1,104 @@
+
+
+import ta2 = tests/imports/qualified
+
+import tests/imports/unqualified
+
+/** 
+ * Local aliases
+ */
+alias myint = int
+alias intptr = int*
+alias TAS2 = TAS
+alias TAS3 = struct { int a, int b }
+alias TAS4 = struct { int a, int b }*
+alias TAS5 = intptr
+
+struct TAS {
+    myint a
+    intptr b
+}
+
+public fn testAlias() {
+    // Test local aliases
+    myint a = 1
+    assert(::typeOf(a) is int)
+    assert(::typeOf(a) is myint)
+    assert(::isInteger(a)) 
+    assert(::sizeOf(a) is 4)
+    
+    intptr b
+    assert(::typeOf(b) is int*)
+    assert(::typeOf(b) is intptr)  
+    assert(::isPointer(b))
+    assert(::sizeOf(b) is 8)
+
+    TAS5 c
+    assert(::typeOf(c) is int*)
+    assert(::typeOf(c) is intptr)  
+    assert(::typeOf(c) is TAS5)  
+    assert(::isPointer(c))
+    assert(::sizeOf(c) is 8)
+
+    TAS tas
+    assert(::typeOf(tas) is TAS)
+    assert(::typeOf(tas.a) is int)
+    assert(::typeOf(tas.a) is myint)
+    assert(::typeOf(tas.b) is int*)
+    assert(::typeOf(tas.b) is intptr)
+    assert(::isStruct(tas))
+    assert(::sizeOf(tas) is 16)
+    assert(::alignOf(tas) is 8)
+    assert(::offsetOf(tas.a) is 0)
+    assert(::offsetOf(tas.b) is 8)
+
+    TAS2 tas2
+    assert(::typeOf(tas2) is TAS)
+    assert(::typeOf(tas2.a) is int)
+    assert(::typeOf(tas2.a) is myint)
+    assert(::typeOf(tas2.b) is int*)
+    assert(::typeOf(tas2.b) is intptr)
+    assert(::isStruct(tas2))
+    assert(::sizeOf(tas2) is 16)
+
+    TAS3 tas3
+    assert(::typeOf(tas3) is TAS3)
+    assert(::typeOf(tas3) is struct { int int })
+    assert(::typeOf(tas3.a) is int)
+    assert(::typeOf(tas3.b) is int)
+    assert(::isStruct(tas3))
+    assert(::sizeOf(tas3) is 8)
+
+    TAS4 tas4
+    assert(::typeOf(tas4) is TAS4)
+    assert(::typeOf(tas4) is struct { int int }*)
+    assert(::isPointer(tas4))
+    assert(::typeOf(tas4.a) is int)
+    assert(::typeOf(tas4.b) is int)
+    assert(::isStruct(tas4))
+    assert(::sizeOf(tas4) is 8)
+
+    ta_qualified()
+    ta_unqualified()
+}
+
+fn ta_qualified() {
+    ta2.QualInt a = 1
+    assert(::typeOf(a) is int)
+    assert(::typeOf(a) is ta2.QualInt)
+
+    // error - must be qualified
+    //QualInt b
+
+    // error - not public
+    //ta2.QualShort b
+}
+
+fn ta_unqualified() {
+    UnqualInt a = 1
+    assert(::typeOf(a) is int)
+    assert(::typeOf(a) is UnqualInt)
+
+    // error - not public
+    //UnqualShort b
+}

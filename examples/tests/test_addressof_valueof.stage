@@ -1,0 +1,28 @@
+
+public fn testAddressOfAndValueOf() {
+    // Values
+    int a1 = '1';       assert(::isValue(a1)); assert(::isPointer(a1) is false)
+    int a2 = '2';       assert(::isValue(a2))
+    int a3 = '3';       assert(::isValue(a3))
+    
+    // Pointers
+    int* b0;            assert(b0 is null); assert(::isPointer(b0)); assert(::isValue(b0) is false)
+
+    int* b1 = &a3;      assert(b1 is not null); assert(*b1 is a3)   
+    int* b2 = &a3;      assert(b2 is b1);       assert(*b2 is a3)
+    int* b3 = b1;       assert(b3 is b1);       assert(*b3 is a3)
+    int* b4 = &a1;      assert(b4 is not b1);   assert(*b4 is a1)   
+
+    int c1 = *b1;       assert(c1 is '3'); assert(c1 is a3)
+    int c2 = *b2;       assert(c2 is '3'); assert(c2 is a3)
+    int c3 = *b3;       assert(c3 is '3'); assert(c3 is a3)    
+    int c4 = *b4;       assert(c4 is '1'); assert(c4 is a1)
+
+    *b4 = '4';          assert(a1 is '4')
+
+    // Pointers to pointers
+    int** d1;           assert(d1 is null);       assert(::isPointer(d1));  assert(::isValue(d1) is false)
+    int** d2 = &b1;     assert(d2 is not d1);     assert(d2 is not null);   assert(*d2 is b1)
+    int** d3 = d2;      assert(d3 is d2);         assert(*d3 is b1)
+    int** d4 = &b2;     assert(d4 is not d2);     assert(*d4 is b2);        assert(**d4 is a3)
+}

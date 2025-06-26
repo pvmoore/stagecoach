@@ -1,0 +1,43 @@
+
+import tc2 = tests/imports/qualified
+import tests/imports/unqualified
+
+/**
+ * Test calling Functions in qualified and unqualified form.
+ */
+public fn testCall() {
+    testCallQualified()
+    testCallUnqualified()
+}
+
+fn testCallQualified() {
+    // Call functions
+    assert(tc2.qual_f1() is 1)
+    assert(tc2.qual_f2('a') is 2)
+
+    // Call function ptrs
+    assert(tc2.qual_v1() is 1)
+    assert(tc2.qual_v2('b') is 2)
+
+    // error - not public
+    //assert(tc2.qual_f3() is 3)
+    //assert(tc2.qual_v3() is 3)
+}
+
+fn testCallUnqualified() {
+    // error - these must be qualified
+    //qual_f1()
+    //qual_f2('z')
+
+    // Call functions
+    assert(unqual_f1() is 3)
+    assert(unqual_f2('c') is 4)
+
+    // Call function ptrs
+    assert(unqual_v1() is 3)  
+    assert(unqual_v2('d') is 4)
+
+    // error - not public
+    //assert(unqual_f3() is 5)
+    //assert(unqual_v3() is 5)
+}

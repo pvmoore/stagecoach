@@ -1,0 +1,25 @@
+
+public:
+
+// stdio
+
+fn puts(byte* str) -> int
+fn putchar(int value) -> int
+fn printf(byte* fmt, ...) -> int  
+
+// stdlib
+
+#(name=itoa) 
+fn _itoa(int value, byte* buffer, int radix) -> byte*
+fn calloc(long num, long size) -> void*
+fn malloc(long size) -> void*
+fn realloc(void* ptr, long size) -> void*
+fn free(void* ptr) -> void
+
+// string
+
+fn strlen(byte*) -> long
+fn memcmp(void* ptr1, void* ptr2, long numBytes) -> int
+fn memcpy(void* dest, void* src, long numBytes) -> void*
+fn memset(void* dest, int value, long numBytes) -> void*
+fn memmove(void* dest, void* src, long numBytes) -> void*

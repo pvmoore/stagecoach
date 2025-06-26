@@ -1,0 +1,214 @@
+
+import console = core/console
+import win 	   = core/windows
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+public:
+
+fn testVulkan() {
+    vkLoad()
+
+	int version
+	VkResult r = vkEnumerateInstanceVersion(&version)
+
+	int major = version ushr 22
+	int minor = (version ushr 12) & 0x3ff
+	int patch = version & 0xfff
+	int variant = version ushr 29
+
+	console.println(major)
+	console.println(minor)
+	console.println(patch)
+	console.println(variant)
+
+	vkUnload()
+}	
+
+fn vkLoad() {
+	g_handle = win.LoadLibraryA("vulkan-1.dll"); assert(g_handle)
+
+    vkGetInstanceProcAddr = win.GetProcAddress(g_handle, "vkGetInstanceProcAddr"); assert(vkGetInstanceProcAddr)
+
+	vkLoadGlobalCommandFunctions()
+	createVulkanInstance()
+	//vkLoadInstanceFunctions(null)
+}
+fn vkUnload() {
+	win.FreeLibrary(g_handle)
+}
+fn vkLoadGlobalCommandFunctions() {
+	vkCreateInstance = vkGetInstanceProcAddr(null, "vkCreateInstance"z); assert(vkCreateInstance);
+	vkEnumerateInstanceExtensionProperties = vkGetInstanceProcAddr(null, "vkEnumerateInstanceExtensionProperties"z); assert(vkEnumerateInstanceExtensionProperties)
+	vkEnumerateInstanceLayerProperties = vkGetInstanceProcAddr(null, "vkEnumerateInstanceLayerProperties"z); assert(vkEnumerateInstanceLayerProperties)
+	vkEnumerateInstanceVersion = vkGetInstanceProcAddr(null, "vkEnumerateInstanceVersion"z); assert(vkEnumerateInstanceVersion);
+}
+fn vkLoadInstanceFunctions(VkInstance instance) {
+
+}
+fn createVulkanInstance() {
+	VkApplicationInfo applicationInfo = {
+        sType: VK_STRUCTURE_TYPE_APPLICATION_INFO,
+        pApplicationName: "test"z,
+        applicationVersion: 1,
+        pEngineName: null,
+        engineVersion: 1,
+        apiVersion: vulkanVersion(1, 0, 0)
+    }
+	VkInstanceCreateInfo instanceCreateInfo = {
+        sType: VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+        pApplicationInfo: &applicationInfo
+    }
+	// // Dump Layers
+	// log("Instance layers: %s", layers.length);
+	// foreach(i, l; layers.values()) {
+	// 	log("  [%s] layer name:'%s' desc:'%s' specVersion:%s implVersion:%s",
+	// 		i,
+	// 		l.layerName.ptr.fromStringz,
+	// 		l.description.ptr.fromStringz,
+	// 		versionToString(l.specVersion),
+	// 		l.implementationVersion);
+	// }
+}
+
+fn vulkanVersion(int major, int minor, int patch) -> int {
+    return (major << 22) | (minor << 12) | patch;
+}
+fn toVkBool32(bool b) -> VkBool32 {
+    return if(b) VK_TRUE else VK_FALSE
+}
+// fn clearColour(float r, float g, float b, float a) -> VkClearValue {
+//     VkClearColorValue value
+//     value.float32 = [r,g,b,a]
+//     return value as VkClearValue
+// }
+// union VkClearValue {
+//     VkClearColorValue           color
+//     VkClearDepthStencilValue    depthStencil
+// }
+fn check(VkResult r) -> bool {
+    if(r is not VK_SUCCESS) {
+        //log("API call returned %s", r);
+        return false
+    }
+	return true
+}
+
+alias HANDLE = void*
+alias VkBool32 = int
+alias VkInstance = struct{}*
+alias VkDevice = struct{}*
+alias VkInstanceCreateFlags = int
+alias VkFlags = int
+
+alias PFN_vkAllocationFunction 			   = fn(void*, long, long, VkSystemAllocationScope) -> void*
+alias PFN_vkReallocationFunction 		   = fn(void*, void*, long, long, VkSystemAllocationScope) -> void*
+alias PFN_vkFreeFunction 				   = fn(void*, void*) -> void*
+alias PFN_vkInternalAllocationNotification = fn(void*, long, VkInternalAllocationType, VkSystemAllocationScope) -> void*
+alias PFN_vkInternalFreeNotification 	   = fn(void*, long, VkInternalAllocationType, VkSystemAllocationScope) -> void*
+
+const int VK_TRUE = 1
+const int VK_FALSE = 0
+const int VK_MAX_EXTENSION_NAME_SIZE = 256
+const int VK_MAX_DESCRIPTION_SIZE = 256
+//const int VK_VERSION_1_0 = vulkanVersion(1,0,0)	// todo - constant fold this to a Number
+
+#(unqualified)
+enum VkResult {
+    VK_SUCCESS 		= 0
+	VK_NOT_READY 	= 1
+    VK_TIMEOUT 		= 2
+    VK_EVENT_SET 	= 3
+    VK_EVENT_RESET 	= 4
+    VK_INCOMPLETE 	= 5
+	// ...
+}
+
+#(unqualified)
+enum VkStructureType {
+    VK_STRUCTURE_TYPE_APPLICATION_INFO      = 0
+    VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO  = 1
+}
+
+#(unqualified)
+enum VkInstanceCreateFlagBits {
+    VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR = 0x00000001
+}
+
+#(unqualified)
+enum VkSystemAllocationScope {
+    VK_SYSTEM_ALLOCATION_SCOPE_COMMAND = 0,
+    VK_SYSTEM_ALLOCATION_SCOPE_OBJECT = 1,
+    VK_SYSTEM_ALLOCATION_SCOPE_CACHE = 2,
+    VK_SYSTEM_ALLOCATION_SCOPE_DEVICE = 3,
+    VK_SYSTEM_ALLOCATION_SCOPE_INSTANCE = 4,
+}
+
+#(unqualified)
+enum VkInternalAllocationType {
+    VK_INTERNAL_ALLOCATION_TYPE_EXECUTABLE = 0,
+}
+
+struct VkExtent2D {
+    int width
+    int height
+}
+struct VkExtent3D {
+    int width
+    int height
+    int depth
+}
+struct VkApplicationInfo {
+	VkStructureType sType
+	void* pNext
+	byte* pApplicationName
+	int applicationVersion
+	byte* pEngineName
+	int engineVersion
+	int apiVersion
+}
+
+struct VkInstanceCreateInfo {
+	VkStructureType sType
+	void* pNext
+	VkInstanceCreateFlagBits flags
+	VkApplicationInfo* pApplicationInfo
+	int enabledLayerCount
+	byte** ppEnabledLayerNames
+	int enabledExtensionCount
+	byte** ppEnabledExtensionNames
+}
+
+struct VkAllocationCallbacks {
+    void*                                   pUserData
+    PFN_vkAllocationFunction                pfnAllocation
+    PFN_vkReallocationFunction              pfnReallocation
+    PFN_vkFreeFunction                      pfnFree
+    PFN_vkInternalAllocationNotification    pfnInternalAllocation
+    PFN_vkInternalFreeNotification          pfnInternalFree
+}
+struct VkExtensionProperties {
+    byte[VK_MAX_EXTENSION_NAME_SIZE] extensionName
+    int specVersion
+}
+struct VkLayerProperties {
+    byte[VK_MAX_EXTENSION_NAME_SIZE] layerName
+    int specVersion
+    int implementationVersion
+    byte[VK_MAX_DESCRIPTION_SIZE] description
+}
+
+#begin(ABI=Win64) 
+
+fn(VkInstance, byte* pName) -> void* vkGetInstanceProcAddr
+fn(int*)-> VkResult vkEnumerateInstanceVersion
+fn(VkInstanceCreateInfo*, VkAllocationCallbacks*, VkInstance*) -> VkResult vkCreateInstance
+fn(byte*,int*,VkExtensionProperties*) -> VkResult vkEnumerateInstanceExtensionProperties
+fn(int*,VkLayerProperties*) -> VkResult vkEnumerateInstanceLayerProperties
+
+#end(ABI)
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+private:
+
+HANDLE g_handle
+VkInstance g_instance

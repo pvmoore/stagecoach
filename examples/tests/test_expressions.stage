@@ -1,0 +1,69 @@
+
+public fn testExpressions() {
+    // boolean expressions
+    bool a1= true;                  assert(a1)
+    bool a2 = false;                assert(a2 is false)
+    bool a3 = 1 is 1;               assert(a3)
+    bool a4 = 1 is not 2;           assert(a4)
+    bool a5 = 1 < 2;                assert(a5)
+    bool a6 = 1 > 2;                assert(a6 is false)
+    bool a7 = 1 <= 2;               assert(a7)
+    bool a8 = 1 >= 2;               assert(a8 is false)
+    bool a9 = 1 is 1 and 2 is 2;    assert(a9)
+    bool a10 = 1 is 1 or 2 is 3;    assert(a10)
+    bool a11 = 1 is 2 or 3 is 3;    assert(a11)
+    bool a12 = (1 is 2) is false;   assert(a12)
+
+    // bitwise expressions
+    byte b1 = 0b111 & 0b10;         assert(b1 is 0b10)
+    byte b2 = 0b01 | 0b10;          assert(b2 is 0b11)
+    byte b3 = 0b11 ^ 0b10;          assert(b3 is 0b01)  
+    byte b4 = 0b11 << 2;            assert(b4 is 0b1100)    
+    byte b5 = 0b1100 >> 2;          assert(b5 is 0b11)  
+
+    // arithmetic expressions
+    int c1 = 2 + 3;                 assert(c1 is 5)
+    short c2 = 5 - 2;               assert(c2 is 3)
+    float c3 = 96.14 * 2;           assert(c3 is 192.28)         
+    double c4 = 123.45 / 2.0;       assert(c4 is 61.725)         
+    int c5 = 0xffff umod 2;         assert(c5 is 1)
+    
+    // Pointer expressions
+    int* y1 = null
+
+    // unary
+    int u1 = -3             // not a unary. this should just be a Number
+    byte u3 = ~0b101;      assert(u3 is 0b11111010) // 250
+    int u4 = -u3;           //assert(u4 is -250)        !!fixme    
+
+    // Assignment
+    int p1 = 1
+    int p2 = p1
+    int p3 = g_a        // reference a global (global can occur anywhere in the module)
+
+    p1 = 2
+    p1 = p2;        assert(p1 is 1)
+
+    // Op assign
+    p1 += 2;        assert(p1 is 3)   
+    p1 -= 1;        assert(p1 is 2)
+    p1 *= 3;        assert(p1 is 6)
+    p1 /= 2;        assert(p1 is 3)
+    p1 %= 2;        assert(p1 is 1)
+    p1 ^= 3;        assert(p1 is 2)
+    p1 &= 1;        assert(p1 is 0)
+    p1 |= 2;        assert(p1 is 2)
+    p1 <<= 1;       assert(p1 is 4)
+    p1 >>= 1;       assert(p1 is 2)  
+
+    // Parens
+    int f1 = (1 + 2) * 3;       assert(f1 is 9)
+    int f2 = 1 + (2 * 3);       assert(f2 is 7)
+    int f3 = (1 + 2) * (3 + 4); assert(f3 is 21)
+    int f4 = (1 + 2) * 3 + 4;   assert(f4 is 13)
+    int f5 = 1 + (2 * 3) + 4;   assert(f5 is 11)
+    int f6 = 1 + 2 * 3 + 4;     assert(f6 is 11)
+}
+
+int g_a = 3
+double g_b  // default initialiser is 0.0

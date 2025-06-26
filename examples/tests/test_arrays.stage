@@ -1,0 +1,107 @@
+
+public fn testArrays() {
+    initialisation()
+
+    // Create an array variable
+    int[2] a;               assert(a is [0, 0])
+    
+
+    // Get a value
+    int e1 = a[1];          assert(e1 is 0)
+
+    // Set a value
+    a[0] = 33;              assert(a is [33, 0])
+
+    // copy the array 
+    int[2] f2 = a;          assert(f2 is [33, 0])
+
+    assert(::typeOf(a) is int[2])
+
+    f2[0] = 34;             assert(f2 is [34, 0])
+                            assert(a is [33, 0])
+
+    // Get pointer to array
+    int* ptr  = &f2 
+    int* ptr2 = &f2[0]
+    int* ptr3 = &f2[1]
+    assert(ptr is ptr2)
+    assert(ptr is not ptr3)
+
+    ptr[1] = 35;            assert(f2 is [34, 35])         
+
+    //float[2] f2 = a           // variable initialiser type mismatch
+    //int[2] g = [1, 2, 3]      // too many elements
+    //int[2] h = [1, 2.0]       // element type mismatch
+}
+
+fn initialisation() {
+    int[2] a;               assert(a is [0, 0])
+    float[1] b;             assert(b is [0.0])
+    int*[2] c;              assert(c is [null, null])
+    int[3]* d;              assert(d is null)   
+    int[3] e = [1, 2, 3];   assert(e is [1, 2, 3])
+
+    // array of structs
+    Red[2] red;   
+
+    assert(red[0].a is 1)
+    assert(red[0].b is 2)
+    assert(red[0].c is 3)
+
+    assert(red[1].a is 1)
+    assert(red[1].b is 2)
+    assert(red[1].c is 3)            
+    
+    assert(red is [{a:1, b:2, c:3}, {a:1, b:2, c:3}])
+
+    // array of enums
+    E1[3] blue;             assert(blue is [E1.A, E1.A, E1.A])
+
+    // array of struct enums
+    E2[3] green
+    assert(green[0].a is 10)
+    assert(green[0].b is 20)
+    assert(green[0].c is 30)
+
+    assert(green[1].a is 10)
+    assert(green[1].b is 20)
+    assert(green[1].c is 30)
+
+    assert(green[2].a is 10)
+    assert(green[2].b is 20)
+    assert(green[2].c is 30)
+            
+    assert(green is [E2.A, E2.A, E2.A])
+
+    // global array
+    assert(g_red is [{a:1, b:2, c:3}, {a:1, b:2, c:3}, {a:1, b:2, c:3}])
+
+    // call function with array parameter
+    int[3] f = [1, 2, 3]
+    arrayParam([1, 2, 3])
+    arrayParam(f)
+}
+
+fn arrayParam(int[3] z) {
+    assert(z[0] is 1)
+    assert(z[1] is 2)
+    assert(z[2] is 3)
+}
+
+struct Red {
+    int a = 1
+    int b = 2
+    int c = 3
+}
+
+enum E1 : byte { 
+    A = 1
+    B       // = 2
+}
+
+enum E2 : Red {
+    A = { a:10, b:20, c:30 }
+    B = { a:4, b:5, c:6 }
+}
+
+Red[3] g_red

@@ -1,0 +1,104 @@
+
+/**
+ * Contains
+ *
+ * Enums:
+ *   - TE2
+ */
+import te2 = tests/imports/qualified
+
+/**
+ * Contains
+ *
+ * Enums:
+ *   - TE3
+ */
+import tests/imports/unqualified
+
+enum LocalEnum {  // int
+    A       // 0
+    B       // 1
+    C       // 2
+}
+enum TE1B : byte {  // byte
+    A               // 0
+    B = 10          // 10
+    C               // 11
+    D = 7           // 7
+    E               // 8
+}
+struct TES {
+    int a
+}
+enum TE1C : TES {
+    A = { a:1 }
+    B = { a:2 }
+} 
+
+TE1C g_te1c     // default init to TE1C.A
+
+enum TE1D : int* {
+    A = null
+}
+
+public fn testEnums() {
+    te_qualified()
+    te_unqualified()
+    te_casting()
+
+    LocalEnum e           // default init to TE1.A
+    assert(e is 0 as LocalEnum)
+    assert(e is LocalEnum.A)
+
+    int a = LocalEnum.A as int
+    assert(a is 0);         
+    assert(::typeOf(LocalEnum.A) is LocalEnum)
+    assert(::typeOf(LocalEnum) is LocalEnum)
+    assert(::typeOf(LocalEnum.A) is not int)
+    assert(LocalEnum.B is 1 as LocalEnum)     
+    assert(LocalEnum.C is 2 as LocalEnum)     
+    //assert(TE1.D is 0)    // error - identifier not found
+
+    assert(TE1B.A is 0 as TE1B);     assert(::typeOf(TE1B.A) is TE1B)
+    assert(TE1B.B is 10 as TE1B);    
+    assert(TE1B.C is 11 as TE1B);    
+    assert(TE1B.D is 7 as TE1B);     
+    assert(TE1B.E is 8 as TE1B);    
+
+    TE1C te1c       // default init to TE1C.A
+    assert(te1c.a is 1)
+
+    // Global enum is default initialised in the init function
+    assert(g_te1c.a is 1)
+
+    assert(TE1D.A is null)
+}
+
+fn te_qualified() {
+    int a = te2.QualEnum.A as int
+    assert(a is 0);         assert(::typeOf(te2.QualEnum.A) is te2.QualEnum)
+    assert(te2.QualEnum.B is 1 as te2.QualEnum); 
+    assert(te2.QualEnum.C is 2 as te2.QualEnum); 
+
+    // error - not public
+    //te2.QualEnum2 a
+}
+
+fn te_unqualified() {
+    int a = UnqualEnum.A as int
+    assert(a is 0)         
+    assert(::typeOf(UnqualEnum.A) is UnqualEnum)
+    assert(UnqualEnum.B is 1 as UnqualEnum);     
+    assert(UnqualEnum.C is 2 as UnqualEnum);   
+
+    // error - not public
+    //UnqualEnum2 a  
+}
+
+fn te_casting() {
+    float a = LocalEnum.B as float
+    assert(a is 1.0)
+
+    LocalEnum e = 1 as LocalEnum    
+    assert(e is LocalEnum.B)
+}

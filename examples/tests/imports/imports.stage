@@ -1,0 +1,33 @@
+
+/**
+ * Functions:
+ *    fn imp_f1() -> void
+ *    fn imp_f2(int,int) -> void
+ * Function ptrs:
+ *    fn()->void imp_v1
+ *    fn(int)->void imp_v2
+ */
+import imp = tests/imports/qualified
+
+/**
+ * Functions:
+ *    fn imp_f1() -> void
+ *    fn imp_f2(int,int) -> void
+ * Function ptrs:
+ *    fn()->void imp_v1
+ *    fn(int)->void imp_v2
+ */
+import tests/imports/unqualified
+
+public fn testImports() {
+    testQualifiedImports()
+    testUnqualifiedImports()   
+}
+
+fn testQualifiedImports() {
+
+}
+
+fn testUnqualifiedImports() {
+
+}

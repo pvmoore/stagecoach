@@ -1,0 +1,29 @@
+
+import stdc = core/stdc
+
+public:
+
+fn printChar(int ch) -> void {
+    stdc.putchar(ch)
+}
+fn print(byte* str) -> void {
+    stdc.puts(str)
+}
+fn print(int value) -> void {
+    byte[100] buffer
+    stdc.itoa(value, &buffer, 10)
+    stdc.printf("%s"z, &buffer)
+}
+fn print(double value) -> void {
+    stdc.printf("%f"z, value)
+}
+
+fn println(byte* str) -> void {
+    stdc.printf("%s\n"z, str, 10)
+}
+fn println(int value) -> void {
+    stdc.printf("%d\n"z, value)
+}
+fn println(double value) -> void {
+    stdc.printf("%f\n"z, value)
+}

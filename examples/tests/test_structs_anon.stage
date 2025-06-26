@@ -1,0 +1,83 @@
+
+public fn testAnonStructs() {
+    struct {
+        int a
+        float b
+        bool c
+    } anonStruct
+
+    assert(::isStruct(anonStruct))
+    assert(::sizeOf(anonStruct) is 12)
+    assert(::alignOf(anonStruct) is 4)
+    assert(::typeOf(anonStruct) is struct { int; float; bool; })
+    assert(::typeOf(anonStruct) is struct { int a; float b; bool c; })
+    assert(::typeOf(anonStruct) is struct { int float bool })
+    assert(::offsetOf(anonStruct.a) is 0)
+    assert(::offsetOf(anonStruct.b) is 4)
+    assert(::offsetOf(anonStruct.c) is 8)
+    assert(::isValue(anonStruct))
+    assert(::isPointer(anonStruct) is false)
+    assert(::isInteger(anonStruct) is false)
+    assert(::isReal(anonStruct) is false)
+    assert(::isBool(anonStruct) is false)
+
+    anonStruct.a = 1
+    anonStruct.b = 2.0
+    anonStruct.c = true
+
+    assert(anonStruct.a is 1)
+    assert(anonStruct.b is 2.0)
+    assert(anonStruct.c is true)
+
+    // Error - Unnamed struct members
+    // struct {
+    //     int 
+    //     float 
+    //     bool 
+    // } anonStruct2 
+
+    // Anon struct with default initialisation
+    struct { int a; float b = 3.14; bool c; } anonStruct4
+
+    assert(anonStruct4.a is 0)
+    assert(anonStruct4.b is 3.14)
+    assert(anonStruct4.c is false)
+
+    // Anon struct with initialiser
+    struct { int a; float b; bool c; } anonStruct3 = { 1, 2.0, true }
+
+    assert(anonStruct3.a is 1)
+    assert(anonStruct3.b is 2.0)
+    assert(anonStruct3.c is true)
+    
+    anonStructCall()
+    anonStructCasting()
+}
+
+fn anonStructCall() -> void {
+    struct { int a; float b; bool c; } intFloatBool
+    struct { int a; int b; bool c; } intIntBool
+    
+    // Call with exactly matching anon struct
+    anons1(intFloatBool)
+
+    // Call with struct literal
+    anons1({ 1, 2.0, true })
+
+    // erro - Call with struct literal with incorrect member type
+    //anons1({ 1.0, 2.0, true })
+}
+
+fn anons1(struct { int a; float b; bool c; } s) -> void {
+
+}
+
+fn anonStructCasting() -> void {
+    struct { int a; int b; bool c; } intIntBool = { 1, 2, true }
+
+    // Ok. Structs are the same Type
+    struct{int a,int b,bool c} intIntBool2 = intIntBool
+
+    // error - Cannot cast struct{int,int,bool} to struct{int,float,bool}
+    //struct { int a; float b; bool c; } intFloatBool = intIntBool as struct { int a; float b; bool c; }
+}

@@ -1,0 +1,8 @@
+
+public fn testCasting() {
+    int a = 1
+    byte b = a as byte
+    float c = 1234 as float
+    double d = 12345678 as double
+    long e = 123.3 as long
+}

@@ -1,0 +1,74 @@
+
+public fn testBuiltins() {
+    int a = 1
+    byte b = 2
+    bool c = true
+    float d = 3.14
+    double e = 3.14159
+    long f = 1234567890
+    long g = 1234567890
+    short h = 123
+    int* i = null
+    struct { int a, int b } s
+
+    assert(::isInteger(a))
+    assert(::isInteger(b))
+    assert(::isBool(c))
+    assert(::isReal(d))
+    assert(::isReal(e))
+    assert(::isInteger(f))
+    assert(::isInteger(g))
+    assert(::isInteger(h))
+    assert(::isPointer(i))
+    assert(::isValue(a))
+    assert(::isStruct(s))
+    assert(::isStruct(BI_1))
+    assert(::isStruct(BI_2))
+    assert(::isPacked(BI_1) is false)
+    assert(::isPacked(BI_2))
+
+    assert(::sizeOf(int) is 4)
+    assert(::sizeOf(byte) is 1)
+    assert(::sizeOf(bool) is 1)
+    assert(::sizeOf(float) is 4)
+    assert(::sizeOf(double) is 8)
+    assert(::sizeOf(long) is 8)
+    assert(::sizeOf(a) is 4)
+
+    // ::isFunction
+    fn()->void fptr
+    int notf
+
+    assert(::isFunction(testBuiltins))
+    assert(::isFunction(fptr))
+    assert(::isFunction(int) is false)
+    assert(::isFunction(notf) is false)
+
+    // ::isVoid
+    assert(::isVoid(void))
+    assert(::isVoid(int) is false)
+    assert(::isVoid(notf) is false)
+
+    // ::isEnum
+    TB_1 en
+    assert(::isEnum(TB_1))
+    assert(::isEnum(en))
+    assert(::isEnum(int) is false)
+    assert(::isEnum(notf) is false)
+}
+
+enum TB_1 {
+    A
+    B
+}
+
+struct BI_1 {
+    int a
+    bool b
+}
+
+#(packed)
+struct BI_2 {
+    int a
+    bool b
+}

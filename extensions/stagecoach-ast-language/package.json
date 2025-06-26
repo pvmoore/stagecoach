@@ -1,0 +1,33 @@
+{
+    "name": "candle-ast-lang",
+    "displayName": "PPL6-ast",
+    "description": "PPL6 AST syntax highlighting support",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.38.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "contributes": {
+        "languages": [
+            {
+                "id": "ast",
+                "aliases": [
+                    "ast"
+                ],
+                "extensions": [
+                    ".ast"
+                ],
+                "configuration": "./language-configuration.json"
+            }
+        ],
+        "grammars": [
+            {
+                "language": "ast",
+                "scopeName": "source.ast",
+                "path": "./syntaxes/ast.tmLanguage.json"
+            }
+        ]
+    }
+}

@@ -1,0 +1,7 @@
+
+public alias HANDLE = void*
+
+public fn LoadLibraryA(byte* filename) -> HANDLE
+public fn FreeLibrary(HANDLE hModule) -> bool
+
+public fn GetProcAddress(HANDLE hModule, byte* procName) -> void*
