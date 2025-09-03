@@ -7,13 +7,17 @@ import std.path : absolutePath, baseName, buildNormalizedPath, dirName, withExte
 
 final class Compiler {
 public:
+    enum versionMajor = 0;
+    enum versionMinor = 2;
+    enum versionPatch = 0;
+
     this(CompilerOptions options) {
         this.options = options;
         this.llvm = new LLVMTargetMachine(options.targetTriple);
         this.project = new Project(options);
     }
     CompilationError[] compile(string filename) {
-        consoleLogAnsi(Ansi.CYAN_BOLD ~ Ansi.UNDERLINE, "\nStagecoach Lang, Stage 1");
+        consoleLogAnsi(Ansi.CYAN_BOLD ~ Ansi.UNDERLINE, "\nStagecoach Lang v%s.%s.%s", versionMajor, versionMinor, versionPatch);
 
         string workingDirectory = getcwd().replace("\\", "/") ~ "/";
         string normalisedFilename = buildNormalizedPath(filename).replace("\\", "/");

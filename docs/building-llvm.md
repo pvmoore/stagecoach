@@ -7,12 +7,12 @@ Fetch the code from github if you don't already have it:
 	git clone https://github.com/llvm/llvm-project.git
 
 
-Change to the desired branch. For llvm 20 we use the llvmorg-20.1.7 branch:
+Change to the desired branch. For llvm 21 we use the llvmorg-21.1.0 branch:
 
-	git checkout llvmorg-20.1.7
+	git checkout llvmorg-21.1.0
 	git status
 
-	> HEAD detached at llvmorg-20.1.7
+	> HEAD detached at llvmorg-21.1.0
 	> nothing to commit, working tree clean
 
 Move to the llvm directory and create a build directory and change to it:
@@ -27,7 +27,7 @@ Install Python 3.8 if you don't already have it:
 
 Configure the build: (These options assume you also want LLD)
 
-	cmake -G "Visual Studio 17 2022" -A x64 -DLLVM_TARGETS_TO_BUILD="X86" -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded" 
+	cmake -G "Visual Studio 17 2022" -A x64 -DLLVM_TARGETS_TO_BUILD="X86"  -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded"  
 	-DLLVM_ENABLE_PROJECTS=lld ..
 
 Open LLVM.sln in Visual Studio and build the project.
@@ -38,7 +38,7 @@ Get the full list of required libs by running:
 
 Add the lib files to dub.sdl eg.
 
-	lflags "/LIBPATH:C:/work/llvm-20/lib"
+	lflags "/LIBPATH:C:/work/llvm-21/lib"
 	libs "LLVMCore" 
 	# .. add the rest of the libs
 
