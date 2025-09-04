@@ -9,6 +9,9 @@ public:
         this.source = source;
     }
     Token[] tokenise() {
+
+        updateLoggingContext(mod, LoggingStage.Tokenising);
+        
         while(pos < source.length) {
             char ch = peek();
             //log("ch = %s", ch);

@@ -1,5 +1,12 @@
 # Version History
 
+## 0.2.1
+
+September 2025
+
+- Move @common code out of the project source directory into resources/common_code
+- Add initial test suite implementation. Needs more work.
+
 ## 0.2.0
 
 September 2025

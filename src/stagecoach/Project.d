@@ -1,16 +1,18 @@
 module stagecoach.Project;
 
 import stagecoach.all;
-import std.file : exists, mkdirRecurse, read;
+import std.file : getcwd, exists, mkdirRecurse, read;
+import std.path : absolutePath, baseName, buildNormalizedPath, dirName, withExtension;
 
 final class Project {
 public:
-    // Dynamic state
+    // Fixed state
+    string mainFilename;
     string directory;   
     string targetDirectory;
     string targetName;
-    string mainFilename;
 
+    // Dynamic state
     Module mainModule;
     Module[] allModules;
     Module[string] modulesByFilename;
@@ -24,12 +26,32 @@ public:
     bool isDebug;
     string[] libs;
 
-    this(CompilerOptions options) {
+    string[] additionalSourceDirectories = [
+        "resources/common_code/"
+    ];
+
+    this(CompilerOptions options, string mainFilename) {
         this.options = options;
         this.targetTriple = options.targetTriple;
         this.subsystem = options.subsystem;
         this.isDebug = options.isDebug;
         this.libs = options.libs.dup;
+
+        string workingDirectory = getcwd().replace("\\", "/") ~ "/";
+        string normalisedFilename = buildNormalizedPath(mainFilename).replace("\\", "/");
+
+        this.mainFilename = baseName(normalisedFilename);
+        this.directory = dirName(normalisedFilename) ~ "/";
+        this.targetDirectory = workingDirectory ~ ".target/";
+        this.targetName = baseName(normalisedFilename).withExtension("").array;
+
+        this.createTargetDirectory();
+
+        consoleLog("Working directory .. %s", workingDirectory);
+        consoleLog("Project directory .. %s", this.directory);
+        consoleLog("Main filename ...... %s", this.mainFilename);
+        consoleLog("Target directory ... %s", this.targetDirectory);
+        consoleLog("Target name ........ %s.exe", this.targetName);
     }
 
     bool hasErrors() { return errors.length > 0; }
@@ -72,7 +94,21 @@ public:
         if(relFilename in modulesByFilename) return modulesByFilename[relFilename];
 
         // Read the source
-        auto source = read(this.directory ~ relFilename).as!string;
+        string source;
+
+        // Try to read the file from the project directory
+        if(exists(this.directory ~ relFilename)) {
+            source = read(this.directory ~ relFilename).as!string;
+        } else {
+            // Look in the additional source directories
+            foreach(dir; this.additionalSourceDirectories) {
+
+                if(exists(dir ~ relFilename)) {
+                    source = read(dir ~ relFilename).as!string;
+                    break;
+                }
+            }
+        }
 
         // Create and initialise the Module instance
         Module mod = makeNode!Module(0);
@@ -82,48 +118,20 @@ public:
         mod.source = source;
         addModule(mod);
 
-        updateLoggingContext(mod, LoggingStage.Tokenising);
-
         // Lex the source into a Token array
         mod.tokens = new Lexer(mod, source).tokenise();
-
-        // Add tokens for implicit import of @common
-        if(mod.name != "@common") {
-            mod.tokens = [
-                makeToken(TokenKind.IDENTIFIER, "import", 0, 0),
-                makeToken(TokenKind.IDENTIFIER, "@common", 0, 0)
-            ] ~ mod.tokens;
-        }
 
         // Scan the module for user defined types, imports and function names
         mod.scanResult = scanModule(mod);
 
+        // Slightly hacky. Add an implicit import of module "@common"
+        if(mod.name != "@common") {
+            processScanImport(mod, ScanImport("@common"), false);
+        }
+
         // Process the imports
         foreach(ScanImport imp; mod.scanResult.imports) {
-            string alias_     = imp.alias_;
-            string importName = imp.name;
-
-            if(importName == mod.name) {
-                syntaxError(mod, imp.moduleToken.line, imp.moduleToken.column, "Recursive import");
-            }
-
-            string path = this.directory ~ toSourceFilename(importName);
-            if(!exists(path)) {
-                syntaxError(mod, imp.moduleToken.line, imp.moduleToken.column, "Module '%s' (%s) not found".format(importName, path));
-                return mod;
-            }
-
-            Module importedModule = addModuleSourceFile(toSourceFilename(importName));
-
-            if(alias_) {
-                if(mod.isModuleAlias(alias_)) {
-                    syntaxError(mod, imp.aliasToken.line, imp.aliasToken.column, "Module alias '%s' already defined".format(alias_));
-                    return mod;
-                }
-                mod.importedModulesQualified[alias_] = importedModule;
-            } else {
-                mod.importedModulesUnqualified[importName] = importedModule;
-            }   
+            processScanImport(mod, imp, true);   
         }
 
         writeScanResults(this, mod);
@@ -165,6 +173,8 @@ public:
         }
         return externalLibs ~ libs;
     }
+//──────────────────────────────────────────────────────────────────────────────────────────────────
+private:
     void createTargetDirectory() {
         void create(string dir) {
             if(!dir.exists()) {
@@ -176,4 +186,38 @@ public:
         create(targetDirectory ~ "/ll/");
         create(targetDirectory ~ "/logs/");
     } 
+    void processScanImport(Module mod, ScanImport imp, bool checkPath) {
+        string alias_     = imp.alias_;
+        string importName = imp.name;
+
+        // Check for a module importing itself
+        if(importName == mod.name) {
+            syntaxError(mod, imp.moduleToken.line, imp.moduleToken.column, "Recursive import");
+            return;
+        }
+
+        // Check if the imported module can be found
+        if(checkPath) {
+            string path = this.directory ~ toSourceFilename(importName);
+            if(!exists(path)) {
+                syntaxError(mod, imp.moduleToken.line, imp.moduleToken.column, "Module '%s' (%s) not found".format(importName, path));
+                return;
+            }
+        }
+
+        Module importedModule = addModuleSourceFile(toSourceFilename(importName));
+
+        if(alias_) {
+            // Check for duplicate alias
+            if(mod.isModuleAlias(alias_)) {
+                syntaxError(mod, imp.aliasToken.line, imp.aliasToken.column, "Module alias '%s' already defined".format(alias_));
+                return;
+            }
+            mod.importedModulesQualified[alias_] = importedModule;
+            mod.log("  Importing module %s as %s", importName, alias_);
+        } else {
+            mod.importedModulesUnqualified[importName] = importedModule;
+            mod.log("  Importing module %s", importName);
+        }   
+    }
 }

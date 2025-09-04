@@ -39,6 +39,19 @@
             "problemMatcher": []
         },
         {
+            "label": "**** Run Test Suite ****",
+            "type": "shell",
+            "windows": {
+                "command": "scripts/run_build.bat dmd debug test test_suite",
+            },
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
             "label": "**** ### Update extensions ### ****",
             "type": "shell",
             "windows": {

@@ -2,47 +2,33 @@ module stagecoach.Compiler;
 
 import stagecoach.all;
 
-import std.file : getcwd;
-import std.path : absolutePath, baseName, buildNormalizedPath, dirName, withExtension;
-
 final class Compiler {
 public:
     enum versionMajor = 0;
     enum versionMinor = 2;
-    enum versionPatch = 0;
+    enum versionPatch = 1;
 
     this(CompilerOptions options) {
         this.options = options;
         this.llvm = new LLVMTargetMachine(options.targetTriple);
-        this.project = new Project(options);
     }
-    CompilationError[] compile(string filename) {
+    CompilationError[] compileProject(string filename) {
         consoleLogAnsi(Ansi.CYAN_BOLD ~ Ansi.UNDERLINE, "\nStagecoach Lang v%s.%s.%s", versionMajor, versionMinor, versionPatch);
 
-        string workingDirectory = getcwd().replace("\\", "/") ~ "/";
-        string normalisedFilename = buildNormalizedPath(filename).replace("\\", "/");
+        this.project = new Project(options, filename);
+
         auto llvmVersion = getLLVMVersion();
-
-        // Create a new Project which encapsulates the compilation process
-        project.mainFilename = baseName(normalisedFilename);
-        project.directory = dirName(normalisedFilename) ~ "/";
-        project.targetDirectory = workingDirectory ~ ".target/";
-        project.targetName = baseName(normalisedFilename).withExtension("").array;
-
-        project.createTargetDirectory();
-
-        consoleLog("Working directory .. %s", workingDirectory);
-        consoleLog("Project directory .. %s", project.directory);
-        consoleLog("Main filename ...... %s", project.mainFilename);
-        consoleLog("Target directory ... %s", project.targetDirectory);
-        consoleLog("Target name ........ %s.exe", project.targetName);
         consoleLog("LLVM version ....... %s.%s.%s", llvmVersion[0], llvmVersion[1], llvmVersion[2]);
 
         try{
             do{
                 consoleLogAnsi(Ansi.CYAN, "─────────────────────────────────────────────────────────── Scanning Modules");
+                
                 // Start processing the main file. This will pull in imports and process them as well
                 project.addModuleSourceFile(project.mainFilename);
+
+                // Add common files
+                project.addModuleSourceFile("@common.stage");
 
                 consoleLogAnsi(Ansi.CYAN, "─────────────────────────────────────────────────────────── Parsing Modules");
                 parseAllModules();

@@ -3,7 +3,7 @@ module stagecoach.resolving.resolve_call;
 import stagecoach.all;
 
 void resolveCall(Call n, ResolveState state) {
-    //state.log("  Resolving call %s",  n.name);
+    state.mod.log("  Resolving call %s", n.name);
 
     // todo - We can use the call.resolveHistory here to see if it is worth re-resolving.
     //        For now we will just repeat the work
@@ -159,14 +159,10 @@ void collectNameCandidates(Call n, ResolveState state) {
         nd = nd.prev(false);
     }
 
-    // Look for a function with the same name in the imported Modules
-    foreach(imp; mod.childrenOfType!Import()) {
-
-        // Only check unaliased imports
-        if(imp.name !is null) continue;
-
+    // Look for a function with the same name in the imported unqualified modules
+    foreach(m; mod.importedModulesUnqualified.values) {
         // Only look at public Functions and Variables
-        foreach(k; imp.fromModule.children) {
+        foreach(k; m.children) {
             if(Function f = k.as!Function) {
                 if(f.isPublic && f.getName() == n.name) {
                     n.resolveHistory.nameCandidates ~= TargetOfCall.make(n, f);

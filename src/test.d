@@ -3,8 +3,16 @@ module test;
 import std.stdio;
 
 import stagecoach;
+import test_suite;
 
-void main() {
+void main(string[] args) {
+
+    auto arg = args.length > 1 ? args[1] : "test";
+
+    if("test_suite" == arg) {
+        runTestSuite();
+        return;
+    }
     
     auto options = new CompilerOptions();
     options.writeLL = true;
@@ -20,7 +28,7 @@ void main() {
     options.enableBoundsChecks = true;
 
     Compiler compiler = new Compiler(options);
-    auto errors = compiler.compile("examples/test.stage");
+    auto errors = compiler.compileProject("examples/test.stage");
 
     // Log the errors if there were any
     if(errors.length > 0) {

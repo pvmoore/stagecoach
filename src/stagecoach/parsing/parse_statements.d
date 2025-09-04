@@ -462,6 +462,10 @@ void parseStruct(Node parent, ParseState state, bool isPublic) {
  * 'import' [ name '=' ] moduleName { '/' moduleName }
  */
 void parseImport(Node parent, ParseState state, bool isPublic) {
+    // This Import type is not actually used anywhere as far as I remember. 
+    // The scanner and Module between them hold all of this information. 
+    // Maybe we can just remove Import and skip these tokens.
+
     Import i = makeNode!Import(state);
     parent.add(i);
 

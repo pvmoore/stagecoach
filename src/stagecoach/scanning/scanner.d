@@ -25,8 +25,8 @@ struct UDT {
 }
 
 struct ScanImport {
-    string alias_;
     string name;
+    string alias_;
     Token aliasToken;
     Token moduleToken;
 }
@@ -40,6 +40,8 @@ struct ScanImport {
 ScanResult scanModule(Module mod) {
 
     updateLoggingContext(mod, LoggingStage.Scanning);
+
+    mod.log("Scanning module");
 
     Token[] tokens = mod.tokens;
     ScanResult result;
@@ -137,5 +139,6 @@ ScanResult scanModule(Module mod) {
         }
         i++;
     }
+
     return result;
 }
