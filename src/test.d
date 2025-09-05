@@ -20,7 +20,10 @@ void main(string[] args) {
     options.writeObj = true;
     options.checkOnly = false;
     options.subsystem = "console";
+
+    options.targetName = "test.exe";
     
+    options.verboseLogging = true;
     options.isDebug = true;
 
     options.enableAsserts = true;

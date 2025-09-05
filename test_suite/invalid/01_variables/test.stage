@@ -1,0 +1,10 @@
+/*
+    name "variable not found"
+    tags [resolution]
+    args []
+    errors ["identifier not found"]
+*/
+public fn main() -> int {
+    a = 0
+    return 0
+}

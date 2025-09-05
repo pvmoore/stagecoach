@@ -4,8 +4,8 @@
     args []
     errors []
 */
-public fn main() {
- 
+public fn main() -> int {
+    return 0
 }
 
 

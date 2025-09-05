@@ -1,5 +1,12 @@
 # Version History
 
+## 0.2.4
+
+September 2025
+
+- Remove usused resources/common_code directory
+- More work on running the test suite
+
 ## 0.2.3
 
 September 2025

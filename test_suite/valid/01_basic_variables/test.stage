@@ -4,9 +4,10 @@
     args []
     errors []
 */
-public fn main() {
+public fn main() -> int {
     locals()
     globals()
+    return 0
 }
 
 fn locals() {

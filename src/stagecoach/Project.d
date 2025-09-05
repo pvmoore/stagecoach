@@ -9,12 +9,9 @@ public:
     // Fixed state
     string mainFilename;
     string directory;   
-    string targetDirectory;
     string targetName;
-
-    // Fixed user options
+    string targetDirectory;
     CompilerOptions options;
-    string targetTriple;
 
     // Dynamic state
     Module mainModule;
@@ -25,26 +22,30 @@ public:
 
     this(CompilerOptions options, string mainFilename) {
         this.options = options;
-        this.targetTriple = options.targetTriple;
 
-        string workingDirectory = getcwd().replace("\\", "/") ~ "/";
-        string normalisedFilename = toCanonicalPath(mainFilename, false);
+        string normalisedFilename = toCanonicalFilename(mainFilename, false);
 
         this.mainFilename = baseName(normalisedFilename);
         this.directory = dirName(normalisedFilename) ~ "/";
-        this.targetDirectory = workingDirectory ~ ".target/";
-        this.targetName = baseName(normalisedFilename).withExtension("").array;
 
-        this.createTargetDirectory();
+        if(options.targetName) {
+            this.targetName = options.targetName.baseName().withExtension("").array();
+        } else {
+            this.targetName = baseName(normalisedFilename).withExtension("").array();
+        }
+
+        string workingDirectory = toCanonicalDirectory(getcwd(), false);
+        this.targetDirectory = toCanonicalDirectory(options.targetDirectory, false);
+        this.createTargetDirectory();      
 
         consoleLog("Working directory .. %s", workingDirectory);
         consoleLog("Project directory .. %s", this.directory);
         consoleLog("Main filename ...... %s", this.mainFilename);
         consoleLog("Target directory ... %s", this.targetDirectory);
-        consoleLog("Target name ........ %s.exe", this.targetName);
+        consoleLog("Target name ........ %s", this.targetName);
 
         foreach(lib; options.getLibs()) {
-            consoleLog("Lib ................ '%s' %s", lib.name, lib.sourceDirectory);
+            consoleLog("Lib ................ '%s' -> %s", lib.name, lib.sourceDirectory);
         }
     }
 
@@ -79,7 +80,7 @@ public:
 
     Module processMainSourceFile(string relFilename) { 
         if(!exists(directory ~ relFilename)) {
-            throw new Exception("Source file not found: %s".format(directory ~ relFilename));
+            throw new Exception("Main source file not found: %s".format(directory ~ relFilename));
         }
         return processSourceFile(directory, relFilename);
     }
@@ -136,9 +137,13 @@ private:
         create(targetDirectory ~ "/logs/");
     } 
     /**
+     * Recursively process a source file. 
      * - Read the source
      * - Tokenise the source
      * - Scan the source for user defined types, imports and function names
+     * - Process the imports
+     * - Add the Module to the project
+     * - Return the Module
      */
     Module processSourceFile(string baseDirectory, string relFilename) {
 
@@ -161,13 +166,8 @@ private:
         // Lex the source into a Token array
         mod.tokens = new Lexer(mod, source).tokenise();
 
-        // Scan the module for user defined types, imports and function names
+        // Scan the module for user defined types and imports 
         mod.scanResult = scanModule(mod);
-
-        // Add an implicit [import @common:@common]
-        if(mod.name != "@common") {
-            processImport(mod, ScanImport("@common", null, "@common"));
-        }
 
         // Process the imports
         foreach(ScanImport imp; mod.scanResult.imports) {
@@ -182,7 +182,7 @@ private:
 
         // Check for a module importing itself
         if(imp.libName is null && imp.path == mod.name) {
-            syntaxError(mod, imp.moduleToken.line, imp.moduleToken.column, "Recursive import");
+            syntaxError(mod, imp.moduleToken.line, imp.moduleToken.column, "A module is not allowed to import itself");
             return;
         }
 

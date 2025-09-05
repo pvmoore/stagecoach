@@ -10,9 +10,12 @@ public:
         string libFile;             // eg. "C:/work/stagecoach/libs/core/lib/libcore.lib" 
     }
 
-    string targetTriple = "x86_64-pc-windows-msvc";
-    string subsystem = "console";
+    string targetDirectory = ".target/";
+    string targetTriple    = "x86_64-pc-windows-msvc";
+    string subsystem       = "console";
+    string targetName;  // if this is empty then use the base name of the main file
 
+    bool verboseLogging = false;
     bool isDebug = true;
     bool checkOnly = false;
 
@@ -25,6 +28,7 @@ public:
     bool writeAST = false;
 
     this() {
+        // Add built-in libraries
         CompilerOptions.Lib coreLib = {
             name: "core",
             sourceDirectory: "libs/core",
@@ -55,7 +59,7 @@ public:
         }
 
         if(lib.sourceDirectory) {
-            lib.sourceDirectory = toCanonicalPath(lib.sourceDirectory, false);
+            lib.sourceDirectory = toCanonicalDirectory(lib.sourceDirectory, false);
         }
 
         libs ~= lib;

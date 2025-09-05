@@ -54,6 +54,11 @@ ScanResult scanModule(Module mod) {
     Token[] tokens = mod.tokens;
     ScanResult result;
 
+    // Add an implicit [import @common:@common]
+    if(mod.name != "@common") {
+        result.imports ~= ScanImport("@common", null, "@common");
+    }
+
     int brace = 0;
     int square = 0;
     int paren = 0;

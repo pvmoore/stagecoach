@@ -6,10 +6,13 @@ final class Compiler {
 public:
     enum versionMajor = 0;
     enum versionMinor = 2;
-    enum versionPatch = 3;
+    enum versionPatch = 4;
 
     this(CompilerOptions options) {
         this.options = options;
+        if(!options.verboseLogging) {
+            g_loggingEnabled = false;
+        }
         this.llvm = new LLVMTargetMachine(options.targetTriple);
     }
     CompilationError[] compileProject(string filename) {

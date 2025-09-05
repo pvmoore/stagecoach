@@ -21,17 +21,29 @@ string toSourceFilename(string moduleName) {
  * Convert a path to a canonical form.
  *  - If forceToAbsolute is true then the path is converted to an absolute path.
  *  - The path separator is normalised to '/'.
- *  - If the path is a directory then a trailing '/' is added.
+ *  - A trailing '/' is added.
  */
-string toCanonicalPath(string path, bool forceToAbsolute) {
+string toCanonicalDirectory(string path, bool forceToAbsolute) {
     import std.path : buildNormalizedPath, absolutePath;
     import std.array : replace;
-    import std.file : isDir;
 
     string p1 = forceToAbsolute ? absolutePath(path) : path;
     string p2 = buildNormalizedPath(p1).replace("\\", "/");
-    if(isDir(p2) && !p2.endsWith("/")) p2 ~= "/"; 
+    if(!p2.endsWith("/")) p2 ~= "/"; 
     return p2;
+}
+
+/**
+ * Convert a path to a canonical form.
+ *  - If forceToAbsolute is true then the path is converted to an absolute path.
+ *  - The path separator is normalised to '/'.
+ */
+string toCanonicalFilename(string path, bool forceToAbsolute) {
+    import std.path : buildNormalizedPath, absolutePath;
+    import std.array : replace;
+
+    string p1 = forceToAbsolute ? absolutePath(path) : path;
+    return buildNormalizedPath(p1).replace("\\", "/");
 }
 
 void writeModuleLL(Project project, Module mod) {

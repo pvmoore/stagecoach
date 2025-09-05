@@ -1,21 +1,40 @@
 module test_suite;
 
-import std.stdio  : writef, writefln;
-import std.file   : read, dirEntries, SpanMode;
 import std.path;
-import std.array  : replace;
-import std.string : indexOf, split;
-import std.format : format;
+import std.stdio     : writef, writefln;
+import std.file      : read, dirEntries, SpanMode;
+import std.array     : replace;
+import std.string    : indexOf, split, strip, toLower;
+import std.format    : format;
+import std.algorithm : map;
+import std.range     : array;
 
 import stagecoach;
 
+__gshared uint g_testIndex;
+__gshared uint g_numPassed;
+__gshared uint g_numFailed;
+
+__gshared int dumpErrorsIndex = -1; // set this to a test index to dump the actual errors
+
 void runTestSuite() {
+    writefln("\nTest suite (valid)\n");
     foreach(e; dirEntries("test_suite/valid", SpanMode.depth)) {
         if(e.isDir) {
             string directory = e.name.buildNormalizedPath().replace("\\", "/");
             runTestDirectory("valid", directory);
         }
     }
+
+    writefln("\nTest suite (invalid)\n");
+    foreach(e; dirEntries("test_suite/invalid", SpanMode.depth)) {
+        if(e.isDir) {
+            string directory = e.name.buildNormalizedPath().replace("\\", "/");
+            runTestDirectory("invalid", directory);
+        }
+    }
+
+    writefln("\n%s passed, %s failed\n", g_numPassed, g_numFailed);
 }
 
 //──────────────────────────────────────────────────────────────────────────────────────────────────
@@ -38,13 +57,21 @@ void runTest(string directory, string filename) {
     // Read the test file and extract the test metadata
     Meta meta = Meta.readFrom(filename);
 
+    if(meta.args.length > 0) {
+        throw new Exception("handle test suite args");
+    }
+
     auto options = new CompilerOptions();
-    options.writeLL = true;
-    options.writeAST = true;
-    options.writeObj = true;
+    options.writeLL = false;
+    options.writeAST = false;
+    options.writeObj = false;
     options.checkOnly = false;
+
     options.subsystem = "console";
+    options.targetDirectory = ".target/";
+    options.targetName = "test";
     
+    options.verboseLogging = false;
     options.isDebug = true;
 
     options.enableAsserts = true;
@@ -56,18 +83,65 @@ void runTest(string directory, string filename) {
 
     bool pass = false;
 
+    if(g_testIndex == dumpErrorsIndex) {
+        writefln("Num errors: %s", errors.length);
+        foreach(e; errors) {
+            writefln("%s", e.getPrettyString());
+        }
+    }
+
     if(meta.errors.length == 0) {
         // This is expected to pass. If there are no errors (in which case this is a fail) then
         // we need to run the executable to check the status code
-    }
-    
-    writef("[%s%s%s], %s'%s' %s %s", CYAN, directory.baseName(), RESET, CYAN, meta.name, filename.baseName(), RESET);
-    
-    if(errors.length > 0) {
-        writefln(" %s%s%s", RED_BOLD, "FAIL", RESET);
+
+        if(errors.length == 0) {
+            // This is a pass if the return code is 0
+            pass = runCode();
+        }
     } else {
-        writefln(" %s%s%s", GREEN_BOLD, "PASS", RESET);
+        // This is expected to fail. Check the errors for expected 
+        lp:foreach(actual; errors) {
+            string summary = actual.getSummary().toLower();
+            foreach(expected; meta.errors) {
+                if(summary.indexOf(expected) != -1) {
+                    pass = true;
+                    break lp;
+                }
+            }
+        }
     }
+    
+    writef("[%s] %s%s%s, %s'%s' %s %s", g_testIndex, CYAN, directory.baseName(), RESET, CYAN, meta.name, filename.baseName(), RESET);
+    
+    if(pass) {
+        g_numPassed++;
+        writefln(" %s%s%s", GREEN_BOLD, "PASS", RESET);
+    } else {
+        g_numFailed++;
+        writefln(" %s%s%s", RED_BOLD, "FAIL", RESET);
+    }
+    g_testIndex++;
+}
+
+bool runCode() {
+    import std.process : execute;
+
+    int returnStatus;
+    try{
+        auto result = execute([".target/test.exe"]);
+
+        returnStatus = result.status;
+        if(returnStatus != 0) {
+            writefln("status = %s", returnStatus);
+            writefln("output = '%s'", result.output.strip());
+        }
+
+    }catch(Exception e) {
+        returnStatus = -1;
+        writefln("error = %s", e.msg);
+    }
+
+    return returnStatus==0;
 }
 
 struct Meta {
@@ -90,7 +164,13 @@ struct Meta {
         meta.name   = between(s, "name", "\"", "\"");
         meta.tags   = between(s, "tags", "[", "]").split(",");
         meta.args   = between(s, "args", "[", "]").split(",");
-        meta.errors = between(s, "errors", "[", "]").split(",");
+        meta.errors = between(s, "errors", "[", "]")
+            .split(",")
+            .map!(it=>it.strip())
+            .map!(it=>it.toLower())
+            .map!((it)=>(it.length > 0 && it[0] == '"') ? it[1..$-1] : it)
+            .array();
+
         return meta;
     }
     string toString() {

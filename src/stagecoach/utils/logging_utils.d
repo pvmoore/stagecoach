@@ -76,10 +76,12 @@ private LoggingContext getLoggingContext(Module mod) {
 //──────────────────────────────────────────────────────────────────────────────────────────────────
 
 void consoleLog(A...)(string fmt, A args) {
+    if(!g_loggingEnabled) return;
     auto s = format(fmt, args);
     writeln(s);
 }
 void consoleLogAnsi(A...)(string ansi, string fmt, lazy A args) {
+    if(!g_loggingEnabled) return;
     auto s = format(fmt, args);
     writefln(ansiWrap(s, ansi));
 }
