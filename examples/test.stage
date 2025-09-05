@@ -16,7 +16,7 @@ import tv   = tests/test_variables
 import vk   = tests/test_vulkan
 import imp  = tests/imports/imports
 
-import stdc = core/stdc  
+import stdc = core:stdc
 
 public fn main() -> int {
     tal.testAlias()

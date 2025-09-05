@@ -14,8 +14,8 @@ struct ScanResult {
             "Unqualified imports:\n--------------------\n%s")
             .format(udts.values().filter!(it=>it.isPublic).map!(it => it.name).join("\n"),
                     udts.values().filter!(it=>!it.isPublic).map!(it => it.name).join("\n"),
-                    imports.filter!(it=>it.alias_ !is null).map!(it => it.name).join("\n"), 
-                    imports.filter!(it=>it.alias_ is null).map!(it => it.name).join("\n"));
+                    imports.filter!(it=>it.alias_ !is null).map!(it => it.toString()).join("\n"), 
+                    imports.filter!(it=>it.alias_ is null).map!(it => it.toString()).join("\n"));
     }
 }
 
@@ -25,10 +25,18 @@ struct UDT {
 }
 
 struct ScanImport {
-    string name;
+    string path;    
     string alias_;
+    string libName;
     Token aliasToken;
     Token moduleToken;
+
+    string toString() {
+        string s;
+        if(alias_) s ~= "%s = ".format(alias_);
+        if(libName) s ~= "%s:".format(libName);
+        return s ~ "%s".format(path);
+    }
 }
 
 /**
@@ -106,27 +114,33 @@ ScanResult scanModule(Module mod) {
                     name = peek().text;
                     result.udts[name] = UDT(name, isPublicStmt());
                 } else if("import" == tok.text) {
-                    // import         name [ / name ... ]
-                    // import alias = name [ / name ... ]
+                    // import alias = name [ : name ] [ / name ... ]
+                    // import         name [ : name ] [ / name ... ]
                     i++;
-                    if(peek().kind == TokenKind.EQUAL) {
-                        i+=2;
-                    }
                     ScanImport imp;
 
+                    // Alias
                     if(peek(1).kind == TokenKind.EQUAL) {
                         imp.aliasToken = peek();
-                        imp.alias_ = peek().text;
+                        imp.alias_     = peek().text;
                         i+=2;
                     }
 
                     imp.moduleToken = peek();
-                    imp.name ~= peek().text;
+
+                    // Library name followed by ':'
+                    if(peek(1).kind == TokenKind.COLON) {
+                        imp.libName = peek().text;
+                        i += 2;
+                    } 
+
+                    // The import path
+                    imp.path = peek().text;
 
                     while(peek(1).kind == TokenKind.SLASH) {
                         i+=2;
-                        imp.name ~= "/";
-                        imp.name ~= peek().text;
+                        imp.path ~= "/";
+                        imp.path ~= peek().text;
                     }
 
                     result.imports ~= imp;

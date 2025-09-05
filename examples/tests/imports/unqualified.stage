@@ -1,5 +1,5 @@
 
-import console = core/console
+import console = core:console
 
 public:
 

@@ -19,10 +19,10 @@ bool msLink(Project project) {
         //"/VERBOSE",
         "/MACHINE:X64",
         "/WX",              /// Treat linker warnings as errors
-        "/SUBSYSTEM:" ~ project.subsystem
+        "/SUBSYSTEM:" ~ project.options.subsystem
     ];
 
-    if(project.isDebug) {
+    if(project.options.isDebug) {
         args ~= [
             "/DEBUG:NONE",  /// Don't generate a PDB for now
             "/OPT:NOREF"    /// Don't remove unreferenced functions and data

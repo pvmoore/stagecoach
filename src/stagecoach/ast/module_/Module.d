@@ -8,6 +8,7 @@ public:
     // static state
     Project project;
     string name;
+    string baseDirectory;
     string relFilename;
     string source;
     Token[] tokens;

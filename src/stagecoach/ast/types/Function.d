@@ -24,7 +24,7 @@ public:
     bool isExternallyReferenced;    // true if this function is referenced from another Module
                                     // which means it will need to have external linkage
     LLVMTypeRef llvmType;                                     
-    LLVMValueRef[string] llvmValueByModule;
+    LLVMValueRef[string] llvmValueByModule; // key = mod.name
 
     // Node
     override NodeKind nodeKind() { return NodeKind.FUNCTION; }

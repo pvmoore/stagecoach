@@ -48,7 +48,6 @@ import stagecoach.ast.node.NodeKind;
 import stagecoach.ast.node.NodeRef;
 
 import stagecoach.ast.stmts.Assert;
-import stagecoach.ast.stmts.Import;
 import stagecoach.ast.stmts.Return;
 import stagecoach.ast.stmts.Statement;
 import stagecoach.ast.stmts.Variable;

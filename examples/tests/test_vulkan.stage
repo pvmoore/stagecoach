@@ -1,6 +1,6 @@
 
-import console = core/console
-import win 	   = core/windows
+import console = core:console
+import win 	   = core:windows
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 public:

@@ -53,6 +53,13 @@ void runTest(string directory, string filename) {
 
     Compiler compiler = new Compiler(options);
     auto errors = compiler.compileProject(filename);
+
+    bool pass = false;
+
+    if(meta.errors.length == 0) {
+        // This is expected to pass. If there are no errors (in which case this is a fail) then
+        // we need to run the executable to check the status code
+    }
     
     writef("[%s%s%s], %s'%s' %s %s", CYAN, directory.baseName(), RESET, CYAN, meta.name, filename.baseName(), RESET);
     

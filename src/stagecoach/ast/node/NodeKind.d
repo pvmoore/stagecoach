@@ -18,7 +18,6 @@ enum NodeKind {
     FUNCTION,
     IDENTIFIER,
     IF,
-    IMPORT,
     INDEX,
     IS,
     MODULE,

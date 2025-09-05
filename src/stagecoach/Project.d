@@ -1,8 +1,8 @@
 module stagecoach.Project;
 
 import stagecoach.all;
-import std.file : getcwd, exists, mkdirRecurse, read;
-import std.path : absolutePath, baseName, buildNormalizedPath, dirName, withExtension;
+import std.file : getcwd, exists, mkdirRecurse;
+import std.path : baseName, dirName, withExtension;
 
 final class Project {
 public:
@@ -12,33 +12,23 @@ public:
     string targetDirectory;
     string targetName;
 
+    // Fixed user options
+    CompilerOptions options;
+    string targetTriple;
+
     // Dynamic state
     Module mainModule;
     Module[] allModules;
     Module[string] modulesByFilename;
     Module[string] modulesByName;
     CompilationError[] errors;
-    
-    // User options
-    CompilerOptions options;
-    string targetTriple;
-    string subsystem;
-    bool isDebug;
-    string[] libs;
-
-    string[] additionalSourceDirectories = [
-        "resources/common_code/"
-    ];
 
     this(CompilerOptions options, string mainFilename) {
         this.options = options;
         this.targetTriple = options.targetTriple;
-        this.subsystem = options.subsystem;
-        this.isDebug = options.isDebug;
-        this.libs = options.libs.dup;
 
         string workingDirectory = getcwd().replace("\\", "/") ~ "/";
-        string normalisedFilename = buildNormalizedPath(mainFilename).replace("\\", "/");
+        string normalisedFilename = toCanonicalPath(mainFilename, false);
 
         this.mainFilename = baseName(normalisedFilename);
         this.directory = dirName(normalisedFilename) ~ "/";
@@ -52,6 +42,10 @@ public:
         consoleLog("Main filename ...... %s", this.mainFilename);
         consoleLog("Target directory ... %s", this.targetDirectory);
         consoleLog("Target name ........ %s.exe", this.targetName);
+
+        foreach(lib; options.getLibs()) {
+            consoleLog("Lib ................ '%s' %s", lib.name, lib.sourceDirectory);
+        }
     }
 
     bool hasErrors() { return errors.length > 0; }
@@ -83,60 +77,17 @@ public:
         }
     }
 
-    /**
-     * - Read the source
-     * - Tokenise the source
-     * - Scan the source for user defined types, imports and function names
-     */
-    Module addModuleSourceFile(string relFilename) {
-
-        // Skip if we have already processed this file
-        if(relFilename in modulesByFilename) return modulesByFilename[relFilename];
-
-        // Read the source
-        string source;
-
-        // Try to read the file from the project directory
-        if(exists(this.directory ~ relFilename)) {
-            source = read(this.directory ~ relFilename).as!string;
-        } else {
-            // Look in the additional source directories
-            foreach(dir; this.additionalSourceDirectories) {
-
-                if(exists(dir ~ relFilename)) {
-                    source = read(dir ~ relFilename).as!string;
-                    break;
-                }
-            }
+    Module processMainSourceFile(string relFilename) { 
+        if(!exists(directory ~ relFilename)) {
+            throw new Exception("Source file not found: %s".format(directory ~ relFilename));
         }
-
-        // Create and initialise the Module instance
-        Module mod = makeNode!Module(0);
-        mod.project = this;
-        mod.name = toModuleName(relFilename);
-        mod.relFilename = relFilename;
-        mod.source = source;
-        addModule(mod);
-
-        // Lex the source into a Token array
-        mod.tokens = new Lexer(mod, source).tokenise();
-
-        // Scan the module for user defined types, imports and function names
-        mod.scanResult = scanModule(mod);
-
-        // Slightly hacky. Add an implicit import of module "@common"
-        if(mod.name != "@common") {
-            processScanImport(mod, ScanImport("@common"), false);
+        return processSourceFile(directory, relFilename);
+    }
+    Module processCommonSourceFile(string relFilename) { 
+        if(!exists(COMMON_CODE_BASE_DIRECTORY ~ relFilename)) {
+            throw new Exception("Source file not found: %s".format(COMMON_CODE_BASE_DIRECTORY ~ relFilename));
         }
-
-        // Process the imports
-        foreach(ScanImport imp; mod.scanResult.imports) {
-            processScanImport(mod, imp, true);   
-        }
-
-        writeScanResults(this, mod);
-
-        return mod;
+        return processSourceFile(COMMON_CODE_BASE_DIRECTORY, relFilename);
     }
 
     /**
@@ -144,11 +95,10 @@ public:
      * This consists of the C runtime libraries and any user-specified libraries.
      *
      * https://learn.microsoft.com/en-us/cpp/c-runtime-library/crt-library-features?view=msvc-170#c-runtime-lib-files
-     *
      */
     string[] getExternalLibs() {
         string[] externalLibs;
-        if(isDebug) {
+        if(options.isDebug) {
             externalLibs ~= [
                 //"ucrtd.lib",                  // MS universal C99 runtime (debug)
                 "msvcrtd.lib",                  // MS C initialization and termination (debug)
@@ -171,10 +121,17 @@ public:
             //    "libvcruntime.lib"
             //];
         }
-        return externalLibs ~ libs;
+        foreach(l; options.getLibs()) {
+            if(l.libFile) {
+                externalLibs ~= l.libFile;
+            }
+        }
+        return externalLibs;
     }
 //──────────────────────────────────────────────────────────────────────────────────────────────────
 private:
+    const string COMMON_CODE_BASE_DIRECTORY = "resources/common_code/";
+
     void createTargetDirectory() {
         void create(string dir) {
             if(!dir.exists()) {
@@ -186,38 +143,128 @@ private:
         create(targetDirectory ~ "/ll/");
         create(targetDirectory ~ "/logs/");
     } 
-    void processScanImport(Module mod, ScanImport imp, bool checkPath) {
-        string alias_     = imp.alias_;
-        string importName = imp.name;
+    /**
+     * - Read the source
+     * - Tokenise the source
+     * - Scan the source for user defined types, imports and function names
+     */
+    Module processSourceFile(string baseDirectory, string relFilename) {
+
+        // Skip if we have already processed this file
+        if(relFilename in modulesByFilename) return modulesByFilename[relFilename];
+
+        // Read the source
+        import std.file : read;
+        string source = read(baseDirectory ~ relFilename).as!string;
+
+        // Create and initialise the Module instance
+        Module mod = makeNode!Module(0);
+        mod.project = this;
+        mod.name = toModuleName(relFilename);
+        mod.relFilename = relFilename;
+        mod.source = source;
+        mod.baseDirectory = baseDirectory;
+        addModule(mod);
+
+        // Lex the source into a Token array
+        mod.tokens = new Lexer(mod, source).tokenise();
+
+        // Scan the module for user defined types, imports and function names
+        mod.scanResult = scanModule(mod);
+
+        // Slightly hacky. Add an implicit import of module "@common"
+        if(mod.name != "@common") {
+            processImport(mod, ScanImport("@common"));
+        }
+
+        // Process the imports
+        foreach(ScanImport imp; mod.scanResult.imports) {
+            processImport(mod, imp);   
+        }
+
+        writeScanResults(this, mod);
+
+        return mod;
+    }
+    void processImport(Module mod, ScanImport imp) {
 
         // Check for a module importing itself
-        if(importName == mod.name) {
+        if(imp.libName is null && imp.path == mod.name) {
             syntaxError(mod, imp.moduleToken.line, imp.moduleToken.column, "Recursive import");
             return;
         }
 
-        // Check if the imported module can be found
-        if(checkPath) {
-            string path = this.directory ~ toSourceFilename(importName);
-            if(!exists(path)) {
-                syntaxError(mod, imp.moduleToken.line, imp.moduleToken.column, "Module '%s' (%s) not found".format(importName, path));
+        string relFilename = toSourceFilename(imp.path);
+        string baseDirectory;
+
+        consoleLog("looking for import [%s] from module %s %s", imp, mod.name, mod.baseDirectory);
+        
+        if(imp.libName) {
+            // This is a library include
+            if(auto lib = options.getLib(imp.libName)) {
+                if(lib.sourceDirectory is null) {
+                    syntaxError(mod, imp.moduleToken.line, imp.moduleToken.column, "Library '%s' has no source".format(imp.libName));
+                    return;
+                }
+                baseDirectory = lib.sourceDirectory;
+
+                if(!exists(baseDirectory ~ relFilename)) {
+                    syntaxError(mod, imp.moduleToken.line, imp.moduleToken.column, "Module '%s' not found in library '%s'".format(imp.path, imp.libName));
+                    return;
+                }
+            } else {
+                syntaxError(mod, imp.moduleToken.line, imp.moduleToken.column, "Library '%s' not found".format(imp.libName));
                 return;
+            }
+        } else if(exists(COMMON_CODE_BASE_DIRECTORY ~ relFilename)) {
+            // @common
+            baseDirectory = COMMON_CODE_BASE_DIRECTORY;
+
+        } else if(exists(mod.baseDirectory ~ relFilename)) {
+            // Relative to the importing module
+            baseDirectory = mod.baseDirectory;
+        }
+
+        if(baseDirectory is null) {
+            syntaxError(mod, imp.moduleToken.line, imp.moduleToken.column, "Import '%s' not found".format(imp.path));
+            return;
+        }
+
+        Module importedModule = processSourceFile(baseDirectory, relFilename);
+
+        if(imp.alias_) {
+            // Check for duplicate alias
+            if(mod.isModuleAlias(imp.alias_)) {
+                syntaxError(mod, imp.aliasToken.line, imp.aliasToken.column, "Module alias '%s' already defined".format(imp.alias_));
+                return;
+            }
+            mod.importedModulesQualified[imp.alias_] = importedModule;
+            mod.log("  Importing module %s = %s%s", imp.alias_, imp.libName ? "%s:".format(imp.libName) : "", imp.path);
+        } else {
+
+            string key = imp.libName ? imp.libName ~ ":" ~ imp.path : imp.path;
+
+            mod.importedModulesUnqualified[key] = importedModule;
+            mod.log("  Importing module %s", key);
+        }   
+    }
+    string getImportBaseDirectory(Module mod, string relFilename) {
+        //consoleLog("looking for import %s from module %s %s", relFilename, mod.name, mod.baseDirectory);
+
+        // Local to the module
+        if(exists(mod.baseDirectory ~ relFilename)) return mod.baseDirectory;
+
+        // Common code
+        if(exists(COMMON_CODE_BASE_DIRECTORY ~ relFilename)) return COMMON_CODE_BASE_DIRECTORY;
+
+        // From a library
+        foreach(lib; options.getLibs()) {
+            if(lib.sourceDirectory) {
+                if(exists(lib.sourceDirectory ~ relFilename)) return lib.sourceDirectory;
             }
         }
 
-        Module importedModule = addModuleSourceFile(toSourceFilename(importName));
+        return null;
 
-        if(alias_) {
-            // Check for duplicate alias
-            if(mod.isModuleAlias(alias_)) {
-                syntaxError(mod, imp.aliasToken.line, imp.aliasToken.column, "Module alias '%s' already defined".format(alias_));
-                return;
-            }
-            mod.importedModulesQualified[alias_] = importedModule;
-            mod.log("  Importing module %s as %s", importName, alias_);
-        } else {
-            mod.importedModulesUnqualified[importName] = importedModule;
-            mod.log("  Importing module %s", importName);
-        }   
     }
 }

@@ -17,6 +17,23 @@ string toSourceFilename(string moduleName) {
     return moduleName ~ ".stage";
 }
 
+/**
+ * Convert a path to a canonical form.
+ *  - If forceToAbsolute is true then the path is converted to an absolute path.
+ *  - The path separator is normalised to '/'.
+ *  - If the path is a directory then a trailing '/' is added.
+ */
+string toCanonicalPath(string path, bool forceToAbsolute) {
+    import std.path : buildNormalizedPath, absolutePath;
+    import std.array : replace;
+    import std.file : isDir;
+
+    string p1 = forceToAbsolute ? absolutePath(path) : path;
+    string p2 = buildNormalizedPath(p1).replace("\\", "/");
+    if(isDir(p2) && !p2.endsWith("/")) p2 ~= "/"; 
+    return p2;
+}
+
 void writeModuleLL(Project project, Module mod) {
     string filename = project.getTargetFilename(mod, "", "_opt", "ll");
     writeLLToFile(mod, filename);

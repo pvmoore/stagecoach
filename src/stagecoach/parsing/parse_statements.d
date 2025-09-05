@@ -459,23 +459,25 @@ void parseStruct(Node parent, ParseState state, bool isPublic) {
 }
 
 /**
- * 'import' [ name '=' ] moduleName { '/' moduleName }
+ * 'import' [ name '=' ] [ libname ':' ] moduleName { '/' moduleName }
  */
 void parseImport(Node parent, ParseState state, bool isPublic) {
-    // This Import type is not actually used anywhere as far as I remember. 
-    // The scanner and Module between them hold all of this information. 
-    // Maybe we can just remove Import and skip these tokens.
-
-    Import i = makeNode!Import(state);
-    parent.add(i);
+    // Just parse and throw away this info since we have already scanned it
 
     // todo - implement public imports
 
     state.skip("import");
 
+    // Alias
     if(state.peek(1).kind == TokenKind.EQUAL) {
-        i.name = state.text(); state.next();
+        string name = state.text(); state.next();
         state.skip(TokenKind.EQUAL);
+    }
+
+    // Library
+    if(state.peek(1).kind == TokenKind.COLON) {
+        string libName = state.text(); state.next();
+        state.skip(TokenKind.COLON);
     }
 
     string moduleName = state.text(); state.next();
@@ -487,7 +489,4 @@ void parseImport(Node parent, ParseState state, bool isPublic) {
     }
 
     state.mod.log("importing %s", moduleName);
-    
-    // This Module must exist otherwise the scanner would have failed
-    i.fromModule = state.project.modulesByName[moduleName];
 }
