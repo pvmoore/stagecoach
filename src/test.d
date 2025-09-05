@@ -27,15 +27,6 @@ void main(string[] args) {
     options.enableNullChecks = true;
     options.enableBoundsChecks = true;
 
-    // Add this manually for now. Later this can be added automatically by the compiler
-    CompilerOptions.Lib coreLib = {
-        name: "core",
-        sourceDirectory: "libs/core",
-        libFile: null
-    };
-
-    options.addLib(coreLib);
-
     Compiler compiler = new Compiler(options);
     auto errors = compiler.compileProject("examples/test.stage");
 

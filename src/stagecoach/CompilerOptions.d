@@ -1,7 +1,6 @@
 module stagecoach.CompilerOptions;
 
 import stagecoach.all;
-import std.path : buildNormalizedPath, absolutePath;
 
 final class CompilerOptions {
 public:
@@ -25,7 +24,22 @@ public:
     bool writeLL = false;
     bool writeAST = false;
 
-    private Lib[] libs;
+    this() {
+        CompilerOptions.Lib coreLib = {
+            name: "core",
+            sourceDirectory: "libs/core",
+            libFile: null
+        };
+
+        CompilerOptions.Lib commonLib = {
+            name: "@common",
+            sourceDirectory: "libs/common",
+            libFile: null
+        };
+
+        addLib(coreLib);
+        addLib(commonLib);
+    }
 
     Lib[] getLibs() { return libs; }
 
@@ -35,6 +49,10 @@ public:
     }
 
     void addLib(Lib lib) {
+        if(auto prevLib = getLib(lib.name)) {
+            throw new Exception("Library '%s' already defined".format(lib.name));
+            return;
+        }
 
         if(lib.sourceDirectory) {
             lib.sourceDirectory = toCanonicalPath(lib.sourceDirectory, false);
@@ -69,4 +87,7 @@ public:
                 writeAST,
                 libs); 
     }
+//──────────────────────────────────────────────────────────────────────────────────────────────────
+private:
+    Lib[] libs;
 }

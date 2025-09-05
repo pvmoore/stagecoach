@@ -6,7 +6,7 @@ final class Compiler {
 public:
     enum versionMajor = 0;
     enum versionMinor = 2;
-    enum versionPatch = 2;
+    enum versionPatch = 3;
 
     this(CompilerOptions options) {
         this.options = options;
@@ -26,9 +26,6 @@ public:
                 
                 // Start processing the main file. This will pull in imports and process them as well
                 project.processMainSourceFile(project.mainFilename);
-
-                // Add common files
-                project.processCommonSourceFile("@common.stage");
 
                 consoleLogAnsi(Ansi.CYAN, "─────────────────────────────────────────────────────────── Parsing Modules");
                 parseAllModules();

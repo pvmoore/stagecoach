@@ -1,0 +1,11 @@
+
+public fn @assert(bool condition, byte* moduleName, byte* filename, long line) -> void {
+    if(condition is false) {
+        printf("\u001b[31m[ERROR]\u001b[0m Assertion failed in Module '%s'\n"z, moduleName)
+        printf("        \u001b[35m%s(%lld)\u001b[0m\n"z, filename, line)
+        exit(-1)
+    }
+}
+
+fn exit(int) -> void
+fn printf(byte*, ...) -> int

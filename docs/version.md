@@ -1,5 +1,13 @@
 # Version History
 
+## 0.2.3
+
+September 2025
+
+- Move common code eg. @common module into its own library (libs/common) 
+- Add core and @common libraries as built-in libraries. These are automatically added to every project.
+  Later we may allow the user to specify whether or not to include core.
+
 ## 0.2.2
 
 September 2025

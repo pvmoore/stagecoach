@@ -83,12 +83,6 @@ public:
         }
         return processSourceFile(directory, relFilename);
     }
-    Module processCommonSourceFile(string relFilename) { 
-        if(!exists(COMMON_CODE_BASE_DIRECTORY ~ relFilename)) {
-            throw new Exception("Source file not found: %s".format(COMMON_CODE_BASE_DIRECTORY ~ relFilename));
-        }
-        return processSourceFile(COMMON_CODE_BASE_DIRECTORY, relFilename);
-    }
 
     /**
      * Get the external libraries required by the linker.
@@ -130,8 +124,6 @@ public:
     }
 //──────────────────────────────────────────────────────────────────────────────────────────────────
 private:
-    const string COMMON_CODE_BASE_DIRECTORY = "resources/common_code/";
-
     void createTargetDirectory() {
         void create(string dir) {
             if(!dir.exists()) {
@@ -172,9 +164,9 @@ private:
         // Scan the module for user defined types, imports and function names
         mod.scanResult = scanModule(mod);
 
-        // Slightly hacky. Add an implicit import of module "@common"
+        // Add an implicit [import @common:@common]
         if(mod.name != "@common") {
-            processImport(mod, ScanImport("@common"));
+            processImport(mod, ScanImport("@common", null, "@common"));
         }
 
         // Process the imports
@@ -197,7 +189,7 @@ private:
         string relFilename = toSourceFilename(imp.path);
         string baseDirectory;
 
-        consoleLog("looking for import [%s] from module %s %s", imp, mod.name, mod.baseDirectory);
+        //consoleLog("looking for import [%s] from module %s %s", imp, mod.name, mod.baseDirectory);
         
         if(imp.libName) {
             // This is a library include
@@ -216,9 +208,6 @@ private:
                 syntaxError(mod, imp.moduleToken.line, imp.moduleToken.column, "Library '%s' not found".format(imp.libName));
                 return;
             }
-        } else if(exists(COMMON_CODE_BASE_DIRECTORY ~ relFilename)) {
-            // @common
-            baseDirectory = COMMON_CODE_BASE_DIRECTORY;
 
         } else if(exists(mod.baseDirectory ~ relFilename)) {
             // Relative to the importing module
@@ -247,24 +236,5 @@ private:
             mod.importedModulesUnqualified[key] = importedModule;
             mod.log("  Importing module %s", key);
         }   
-    }
-    string getImportBaseDirectory(Module mod, string relFilename) {
-        //consoleLog("looking for import %s from module %s %s", relFilename, mod.name, mod.baseDirectory);
-
-        // Local to the module
-        if(exists(mod.baseDirectory ~ relFilename)) return mod.baseDirectory;
-
-        // Common code
-        if(exists(COMMON_CODE_BASE_DIRECTORY ~ relFilename)) return COMMON_CODE_BASE_DIRECTORY;
-
-        // From a library
-        foreach(lib; options.getLibs()) {
-            if(lib.sourceDirectory) {
-                if(exists(lib.sourceDirectory ~ relFilename)) return lib.sourceDirectory;
-            }
-        }
-
-        return null;
-
     }
 }
