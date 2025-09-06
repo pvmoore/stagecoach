@@ -94,6 +94,10 @@ string getSummaryMessage(CompilationError error) {
             }
             return "(Expression is Type) is not valid. Use ::typeOf() here instead";
         }
+
+        case MODULE_MAIN_MISSING:
+            return "Main module must have a program entry point function eg 'main' if targetType is EXE";
+
         case STRUCT_LITERAL_MEMBER_TYPE_MISMATCH: {
             Expression ele = error.stmt.as!Expression; assert(ele);
             StructLiteral sl = ele.parent.as!StructLiteral; assert(sl);

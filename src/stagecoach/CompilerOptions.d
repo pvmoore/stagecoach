@@ -9,7 +9,12 @@ public:
         string sourceDirectory;     // eg. "C:/work/stagecoach/libs/core"
         string libFile;             // eg. "C:/work/stagecoach/libs/core/lib/libcore.lib" 
     }
+    enum TargetType {
+        EXE,
+        LIB
+    }
 
+    TargetType targetType  = TargetType.EXE;
     string targetDirectory = ".target/";
     string targetTriple    = "x86_64-pc-windows-msvc";
     string subsystem       = "console";
@@ -18,6 +23,7 @@ public:
     bool verboseLogging = false;
     bool isDebug = true;
     bool checkOnly = false;
+    uint maxErrors = uint.max;
 
     bool enableAsserts = true;
     bool enableNullChecks = true; 

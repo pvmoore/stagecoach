@@ -6,6 +6,7 @@ import win 	   = core:windows
 public:
 
 fn testVulkan() {
+	console.println("Testing Vulkan"z)
     vkLoad()
 
 	int version
@@ -22,10 +23,12 @@ fn testVulkan() {
 	console.println(variant)
 
 	vkUnload()
+	console.println("Vulkan dll unloaded"z)
 }	
 
 fn vkLoad() {
 	g_handle = win.LoadLibraryA("vulkan-1.dll"); assert(g_handle)
+	console.println("Vulkan dll loaded"z)
 
     vkGetInstanceProcAddr = win.GetProcAddress(g_handle, "vkGetInstanceProcAddr"); assert(vkGetInstanceProcAddr)
 

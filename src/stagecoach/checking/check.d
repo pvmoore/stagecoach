@@ -14,6 +14,20 @@ void checkModule(Module mod) {
     log(mod, "Checking Module");
 
     checkChildren(mod);
+
+    if(mod.isMainModule) {
+
+        if(mod.project.options.targetType == CompilerOptions.TargetType.EXE) {
+            // Check that there is a main function
+
+            bool hasMain = mod.hasFunction("main");
+            bool hasWinMain = mod.hasFunction("WinMain");
+
+            if(!hasMain && !hasWinMain) {
+                semanticError(mod, ErrorKind.MODULE_MAIN_MISSING);
+            }
+        }
+    }
 }
 
 void checkChildren(Node parent) {

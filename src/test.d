@@ -30,6 +30,15 @@ void main(string[] args) {
     options.enableNullChecks = true;
     options.enableBoundsChecks = true;
 
+    options.maxErrors = 4;
+
+    CompilerOptions.Lib vulkanLib = {
+        name: "vulkan",
+        sourceDirectory: "libs/vulkan"
+    };
+
+    options.addLib(vulkanLib);
+
     Compiler compiler = new Compiler(options);
     auto errors = compiler.compileProject("examples/test.stage");
 
@@ -41,6 +50,12 @@ void main(string[] args) {
         writefln("");
 
         foreach(i, e; errors) {
+
+            if(i >= options.maxErrors) {
+                writefln("\n... There are more errors but maximum errors is set to %s", options.maxErrors);
+                break;
+            }
+
             writefln("(\u001b[33;1m%s\u001b[0m) \u001b[36m%s\u001b[0m", i+1, e.getLocationString());
             if(i == 0) {
                 writefln("%s", e.getPrettyString());

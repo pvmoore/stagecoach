@@ -86,6 +86,10 @@ void semanticError(Statement n, int offset, ErrorKind kind, ErrorExtraInfo extra
     mod.project.addError(new CompilationError(mod, n, t.line, t.column, kind, extraInfo));
 }
 void semanticError(Project project, Module mod, Node n, ErrorKind kind, ErrorExtraInfo extraInfo = null) {
-    Token t = n.as!Statement.startToken;
-    project.addError(new CompilationError(mod, n.as!Statement, t.line, t.column, kind, extraInfo));
+    Token t;
+    auto stmt = n.as!Statement;
+    if(stmt) {
+        t = stmt.startToken;
+    } 
+    project.addError(new CompilationError(mod, stmt, t.line, t.column, kind, extraInfo));
 }

@@ -1,5 +1,12 @@
 # Version History
 
+## 0.2.6
+
+- Set maxErrors in CompilerOptions
+- Add CompilerOptions.targetType EXE or LIB
+- If targetType is EXE add a check for program entry point function eg 'main'
+- Move vulkan example code into a lib (libs/vulkan)
+
 ## 0.2.5
 
 - Move examples into the test suite
