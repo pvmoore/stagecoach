@@ -291,8 +291,12 @@ void parseFunction(Module mod, ParseState state, bool isPublic) {
         
         parseType(f, state);
     } else {
-        // Assume return void
-        f.add(makeSimpleType(TypeKind.VOID));
+        if(f.isMain) {
+            f.add(makeSimpleType(TypeKind.INT));
+        } else {
+            // Assume return void
+            f.add(makeSimpleType(TypeKind.VOID));
+        }
     }
 
     // Move the return type to the front
@@ -311,8 +315,19 @@ void parseFunction(Module mod, ParseState state, bool isPublic) {
     } else {
         f.isExtern = true;
     }
-    if(f.isExtern && !f.callingConvention) {
+    
+    if(f.isMain || (f.isExtern && !f.callingConvention)) {
         f.callingConvention = "C";
+    }
+
+    if(f.isMain) {
+        // add implicit return 0 at the end of the function if we don't see one
+        auto bodyStmts = f.bodyStatements();
+        if(bodyStmts.length == 0 || !bodyStmts.last().isA!Return) {
+            auto ret = makeNode!Return(state);
+            ret.add(makeIntNumber(0));
+            f.add(ret);
+        }
     }
 }
 

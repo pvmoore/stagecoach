@@ -7,7 +7,7 @@
  *    fn()->void imp_v1
  *    fn(int)->void imp_v2
  */
-import imp = tests/imports/qualified
+import imp = imports/qualified
 
 /**
  * Functions:
@@ -17,7 +17,7 @@ import imp = tests/imports/qualified
  *    fn()->void imp_v1
  *    fn(int)->void imp_v2
  */
-import tests/imports/unqualified
+import imports/unqualified
 
 public fn testImports() {
     testQualifiedImports()

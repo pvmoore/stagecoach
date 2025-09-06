@@ -1,3 +1,10 @@
+/**
+ * magic!!
+ * name "test enums"
+ * tags [enums]
+ * args []
+ * errors []
+ */
 
 /**
  * Contains
@@ -5,7 +12,7 @@
  * Enums:
  *   - TE2
  */
-import te2 = tests/imports/qualified
+import te2 = imports/qualified
 
 /**
  * Contains
@@ -13,7 +20,7 @@ import te2 = tests/imports/qualified
  * Enums:
  *   - TE3
  */
-import tests/imports/unqualified
+import imports/unqualified
 
 enum LocalEnum {  // int
     A       // 0
@@ -41,7 +48,7 @@ enum TE1D : int* {
     A = null
 }
 
-public fn testEnums() {
+public fn main() {
     te_qualified()
     te_unqualified()
     te_casting()

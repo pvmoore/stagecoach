@@ -1,5 +1,12 @@
+/**
+ * magic!!
+ * name "test array"
+ * tags [arrays]
+ * args []
+ * errors []
+ */
 
-public fn testArrays() {
+public fn main() {
     initialisation()
 
     // Create an array variable

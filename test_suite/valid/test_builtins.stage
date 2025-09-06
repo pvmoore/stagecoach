@@ -1,5 +1,12 @@
+/**
+ * magic!!
+ * name "test builtins"
+ * tags [builtins]
+ * args []
+ * errors []
+ */
 
-public fn testBuiltins() {
+public fn main() {
     int a = 1
     byte b = 2
     bool c = true
@@ -39,7 +46,7 @@ public fn testBuiltins() {
     fn()->void fptr
     int notf
 
-    assert(::isFunction(testBuiltins))
+    assert(::isFunction(main))
     assert(::isFunction(fptr))
     assert(::isFunction(int) is false)
     assert(::isFunction(notf) is false)

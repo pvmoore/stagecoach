@@ -1,5 +1,12 @@
+/**
+ * magic!!
+ * name "test casting"
+ * tags [cast]
+ * args []
+ * errors []
+ */
 
-public fn testCasting() {
+public fn main() {
     int a = 1
     byte b = a as byte
     float c = 1234 as float

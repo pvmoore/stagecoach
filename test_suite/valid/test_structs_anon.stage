@@ -1,5 +1,12 @@
+/**
+ * magic!!
+ * name "test anonymous structs"
+ * tags [structs]
+ * args []
+ * errors []
+ */
 
-public fn testAnonStructs() {
+public fn main() {
     struct {
         int a
         float b

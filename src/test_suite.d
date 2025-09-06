@@ -11,51 +11,61 @@ import std.range     : array;
 
 import stagecoach;
 
-__gshared uint g_testIndex;
-__gshared uint g_numPassed;
-__gshared uint g_numFailed;
+__gshared {
+    uint g_testIndex;
+    uint g_numPassed;
+    uint g_numFailed;
 
-__gshared int dumpErrorsIndex = -1; // set this to a test index to dump the actual errors
+    bool g_verboseFailures = true;  // enable to dump errors for all failed tests 
+
+    bool g_compileInDebugMode = true; // tests will be compiled in debug mode
+}
 
 void runTestSuite() {
-    writefln("\nTest suite (valid)\n");
-    foreach(e; dirEntries("test_suite/valid", SpanMode.depth)) {
+    writefln("");
+
+    foreach(e; dirEntries("test_suite", SpanMode.shallow)) {
         if(e.isDir) {
             string directory = e.name.buildNormalizedPath().replace("\\", "/");
-            runTestDirectory("valid", directory);
+            runTestDirectory(e, directory);
         }
     }
 
-    writefln("\nTest suite (invalid)\n");
-    foreach(e; dirEntries("test_suite/invalid", SpanMode.depth)) {
-        if(e.isDir) {
-            string directory = e.name.buildNormalizedPath().replace("\\", "/");
-            runTestDirectory("invalid", directory);
-        }
-    }
+    writef("%s passed, %s failed ", g_numPassed, g_numFailed);
 
-    writefln("\n%s passed, %s failed\n", g_numPassed, g_numFailed);
+    if(g_numFailed > 0) {
+        writefln("%s[FAIL]%s", RED_BOLD, RESET);
+    } else {
+        writefln("%s[PASS]%s", GREEN_BOLD, RESET);
+    }
+    writefln("");
 }
 
 //──────────────────────────────────────────────────────────────────────────────────────────────────
 private:
 
 enum {
-    CYAN       = "\u001b[36m",
-    GREEN_BOLD = "\u001b[32;1m",
-    RED_BOLD   = "\u001b[31;1m",
-    RESET      = "\u001b[0m",
+    CYAN         = "\u001b[36m",
+    GREEN_BOLD   = "\u001b[32;1m",
+    RED_BOLD     = "\u001b[31;1m",
+    MAGENTA_BOLD = "\u001b[35;1m",
+    RESET        = "\u001b[0m",
 }
 
 void runTestDirectory(string suiteName, string directory) {
+    writefln("[%s%s%s]", MAGENTA_BOLD, suiteName, RESET);
     foreach(e; dirEntries(directory, "**.stage", SpanMode.breadth)) {
-        runTest(directory, e.name);
+        runTest(e.name);
     }
+    writefln("");
 }
 
-void runTest(string directory, string filename) {
+void runTest(string filename) {
+    filename = filename.buildNormalizedPath().replace("\\", "/");
+
     // Read the test file and extract the test metadata
     Meta meta = Meta.readFrom(filename);
+    if(!meta.isTest) return;
 
     if(meta.args.length > 0) {
         throw new Exception("handle test suite args");
@@ -72,23 +82,18 @@ void runTest(string directory, string filename) {
     options.targetName = "test";
     
     options.verboseLogging = false;
-    options.isDebug = true;
 
-    options.enableAsserts = true;
-    options.enableNullChecks = true;
-    options.enableBoundsChecks = true;
+    options.isDebug = g_compileInDebugMode;
+
+    // Assume these will all be enabled to ensure valid tests fail on runtime error
+    options.enableAsserts       = true;
+    options.enableNullChecks    = true;
+    options.enableBoundsChecks  = true;
 
     Compiler compiler = new Compiler(options);
     auto errors = compiler.compileProject(filename);
 
     bool pass = false;
-
-    if(g_testIndex == dumpErrorsIndex) {
-        writefln("Num errors: %s", errors.length);
-        foreach(e; errors) {
-            writefln("%s", e.getPrettyString());
-        }
-    }
 
     if(meta.errors.length == 0) {
         // This is expected to pass. If there are no errors (in which case this is a fail) then
@@ -97,6 +102,11 @@ void runTest(string directory, string filename) {
         if(errors.length == 0) {
             // This is a pass if the return code is 0
             pass = runCode();
+        } else if(g_verboseFailures) {
+            // Dump the errors
+            foreach(e; errors) {
+                writefln("%s", e.getPrettyString());
+            }
         }
     } else {
         // This is expected to fail. Check the errors for expected 
@@ -111,7 +121,7 @@ void runTest(string directory, string filename) {
         }
     }
     
-    writef("[%s] %s%s%s, %s'%s' %s %s", g_testIndex, CYAN, directory.baseName(), RESET, CYAN, meta.name, filename.baseName(), RESET);
+    writef("[%s] %s'%s' %s %s", g_testIndex, CYAN, meta.name, filename, RESET);
     
     if(pass) {
         g_numPassed++;
@@ -145,12 +155,14 @@ bool runCode() {
 }
 
 struct Meta {
+    bool isTest;
     string name;
     string[] tags;
     string[] args;
     string[] errors;
 
     /**
+     * magic test
      * name "01_basic_variables"
      * tags [ variables, locals, globals ]
      * args []
@@ -158,9 +170,17 @@ struct Meta {
      */
     static Meta readFrom(string filename) {
         string s = cast(string)read(filename);
+
+        // Skip if this is not a test suite main file
+        if(s.indexOf("magic!!") == -1) {
+            return Meta();
+        }
+
         s = between(s, null, "/*", "*/");
 
-        Meta meta;
+        Meta meta = {
+            isTest: true
+        };
         meta.name   = between(s, "name", "\"", "\"");
         meta.tags   = between(s, "tags", "[", "]").split(",");
         meta.args   = between(s, "args", "[", "]").split(",");

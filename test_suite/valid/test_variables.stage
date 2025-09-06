@@ -1,7 +1,14 @@
+/**
+ * magic!!
+ * name "test variables"
+ * tags [variables]
+ * args []
+ * errors []
+ */
 
 import console = core:console
 
-public fn testVariables() {
+public fn main() {
     locals()
     globals()
     consts()

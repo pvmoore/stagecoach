@@ -1,8 +1,15 @@
+/**
+ * magic!!
+ * name "test named structs"
+ * tags [structs]
+ * args []
+ * errors []
+ */
 
-import qual = tests/imports/qualified
-import tests/imports/unqualified
+import qual = imports/qualified
+import imports/unqualified
 
-public fn testStructs() {
+public fn main() {
     defaultInitialisation()
     opaque()
     withConsts()

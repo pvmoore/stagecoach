@@ -1,5 +1,12 @@
+/**
+ * magic!!
+ * name "test is"
+ * tags [is]
+ * args []
+ * errors []
+ */
 
-public fn testIs() {
+public fn main() {
     int a = 1
     byte b = 2
 

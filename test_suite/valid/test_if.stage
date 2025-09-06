@@ -1,6 +1,12 @@
+/**
+ * magic!!
+ * name "test if"
+ * tags [if]
+ * args []
+ * errors []
+ */
 
-
-public fn testIf() {
+public fn main() {
     // if with then
     int a = 1
     if(a is 1) {

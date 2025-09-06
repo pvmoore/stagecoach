@@ -1,5 +1,12 @@
+/**
+ * magic!!
+ * name "test expressions"
+ * tags [expressions]
+ * args []
+ * errors []
+ */
 
-public fn testExpressions() {
+public fn main() {
     // boolean expressions
     bool a1= true;                  assert(a1)
     bool a2 = false;                assert(a2 is false)

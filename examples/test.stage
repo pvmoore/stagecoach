@@ -1,49 +1,13 @@
 
-import tal  = tests/test_alias
-import ten  = tests/test_enums
-import tav  = tests/test_addressof_valueof
-import ta   = tests/test_arrays
-import tb   = tests/test_builtins
-import tca  = tests/test_call
-import tc   = tests/test_casting
-import te   = tests/test_expressions
-import tif  = tests/test_if
-import tis  = tests/test_is
-import tas  = tests/test_structs_anon
-import tns  = tests/test_structs_named
-import tu   = tests/test_unsigned
-import tv   = tests/test_variables
-import vk   = tests/test_vulkan
-import imp  = tests/imports/imports
-
 import stdc = core:stdc
+import vk   = vulkan/test_vulkan
 
 public fn main() -> int {
-    tal.testAlias()
-    ten.testEnums()
-    tav.testAddressOfAndValueOf()
-    ta.testArrays()
-    tb.testBuiltins()      
-    tca.testCall()
-    tc.testCasting()
-    te.testExpressions()
-    tif.testIf()
-    tis.testIs()
-    tas.testAnonStructs()
-    tns.testStructs()
-    tu.testUnsigned()
-    tv.testVariables() 
     vk.testVulkan()
-    imp.testImports()
 
     stdc.puts("\n\u001b[32;1mOK\u001b[0m"z)
 
-    return 0
-}
+    blah = 1
 
-fn foobar() {
-    
-}
-fn foobaz(int a) {
-    stdc.putchar(a)
+    return 0
 }

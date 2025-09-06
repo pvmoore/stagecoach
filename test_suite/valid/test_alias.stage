@@ -1,8 +1,14 @@
+/**
+ * magic!!
+ * name "test alias"
+ * tags [alias]
+ * args []
+ * errors []
+ */
 
+import ta2 = imports/qualified
 
-import ta2 = tests/imports/qualified
-
-import tests/imports/unqualified
+import imports/unqualified
 
 /** 
  * Local aliases
@@ -19,7 +25,7 @@ struct TAS {
     intptr b
 }
 
-public fn testAlias() {
+public fn main() {
     // Test local aliases
     myint a = 1
     assert(::typeOf(a) is int)

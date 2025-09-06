@@ -1,11 +1,18 @@
+/**
+ * magic!!
+ * name "test call"
+ * tags [call]
+ * args []
+ * errors []
+ */
 
-import tc2 = tests/imports/qualified
-import tests/imports/unqualified
+import tc2 = imports/qualified
+import imports/unqualified
 
 /**
  * Test calling Functions in qualified and unqualified form.
  */
-public fn testCall() {
+public fn main() {
     testCallQualified()
     testCallUnqualified()
 }

@@ -1,23 +1,22 @@
 # Version History
 
-## 0.2.4
+## 0.2.5
 
-September 2025
+- Move examples into the test suite
+- Improve the test suite
+
+## 0.2.4
 
 - Remove usused resources/common_code directory
 - More work on running the test suite
 
 ## 0.2.3
 
-September 2025
-
 - Move common code eg. @common module into its own library (libs/common) 
 - Add core and @common libraries as built-in libraries. These are automatically added to every project.
   Later we may allow the user to specify whether or not to include core.
 
 ## 0.2.2
-
-September 2025
 
 - Remove Import class since it is not required
 - Move core source code into a lib (libs/core)
@@ -33,14 +32,10 @@ September 2025
 
 ## 0.2.1
 
-September 2025
-
 - Move @common code out of the project source directory into resources/common_code
 - Add initial test suite implementation. Needs more work.
 
 ## 0.2.0
-
-September 2025
 
 - Update to LLVM 21.1.0
 

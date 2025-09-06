@@ -1,9 +1,10 @@
-/*
-    name "variable not found"
-    tags [resolution]
-    args []
-    errors ["identifier not found"]
-*/
+/**
+ * magic!!
+ * name "variable not found"
+ * tags [resolution]
+ * args []
+ * errors ["cannot be resolved"]
+ */
 public fn main() -> int {
     a = 0
     return 0

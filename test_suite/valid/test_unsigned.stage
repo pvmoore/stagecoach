@@ -1,5 +1,12 @@
+/**
+ * magic!!
+ * name "test unsigned"
+ * tags [unsigned]
+ * args []
+ * errors []
+ */
 
-public fn testUnsigned() {
+public fn main() {
     assert(::sizeOf(0) is 1)
     assert(::sizeOf(0xff) is 1)
     assert(::sizeOf(0x1ff) is 2)
