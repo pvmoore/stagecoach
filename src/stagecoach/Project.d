@@ -20,8 +20,15 @@ public:
     Module[string] modulesByName;
     CompilationError[] errors;
 
+    // built-in properties and properties passed in by the user
+    // eg. -Dmy_property=1
+    string[string] defines; 
+
     this(CompilerOptions options, string mainFilename) {
         this.options = options;
+
+        defines["__DEBUG__"] = options.isDebug ? "1" : "0";
+        defines["__BOUNDS_CHECKS__"] = options.enableBoundsChecks ? "1" : "0";
 
         string normalisedFilename = toCanonicalFilename(mainFilename, false);
 

@@ -1,0 +1,22 @@
+/**
+ * magic!!
+ * name "defines"
+ * tags [identifiers]
+ * args []
+ * errors []
+ *
+ *
+ * todo: add more defines to args
+ */
+ public fn main() {
+    bool isDebug = __DEBUG__;
+    bool isBoundsChecks = __BOUNDS_CHECKS__;
+
+    assert(isBoundsChecks is true)
+
+    if(__BOUNDS_CHECKS__) {
+        assert(true)
+    } else {
+        assert(false)
+    }
+ }

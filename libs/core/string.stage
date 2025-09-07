@@ -1,0 +1,26 @@
+
+public:
+
+struct string {
+    byte* ptr
+    int len
+}
+
+/**
+ * Return a slice of the string
+ */
+fn slice(string str, int start, int end) -> string {
+    if(__BOUNDS_CHECKS__) {
+        // TODO add always assert that is not removed when enableAsserts is false eg.
+        // assert!(start >= 0 && start < str.len)
+
+        // TODO - add preconditions and postconditions for functions
+        assert(ptr is not null)
+        assert(start >= 0 && start < str.len)
+        assert(end >= 0 && end <= start)
+    }
+    return string { 
+        ptr: str.ptr + start, 
+        len: end - start 
+    };
+}

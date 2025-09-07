@@ -1,5 +1,14 @@
 # Version History
 
+## 0.2.7
+
+- Add definitions (__DEBUG__, __BOUNDS_CHECKS__) These will be replaced with boolean values in the code.
+  In the future we will allow the user to define their own defined properties in the command line
+
+```
+  bool isDebug = __DEBUG__;
+```
+
 ## 0.2.6
 
 - Set maxErrors in CompilerOptions

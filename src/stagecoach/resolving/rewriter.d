@@ -37,6 +37,12 @@ void rewriteToLong(ResolveState state, Node n, long value) {
     state.setRewriteOccurred();
     n.replaceWith(makeLongNumber(value));
 }
+void rewriteToNumber(ResolveState state, Statement n, string stringValue) {
+    state.setRewriteOccurred();
+    auto num = makeNode!Number(n.tokenIndex);
+    num.stringValue = stringValue;
+    n.replaceWith(num);
+}
 
 void rewriteToBinary(ResolveState state, Node n, Operator op, Expression left, Expression right, Type type = null) {
     state.setRewriteOccurred();

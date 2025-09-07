@@ -5,6 +5,16 @@ import stagecoach.all;
 void resolveIdentifier(Identifier n, ResolveState state) {
 
     if(n.isStartOfChain()) {
+
+        // Check defines
+        if(auto def = n.name in n.getProject().defines) {
+            // Rewrite to a Number
+            string value = *def;
+            if(!value) value = "true";
+            rewriteToNumber(state, n, value);
+            return;
+        }
+
         // This must be a Variable or Function within the same Module
 
         if(n.hasAncestor(NodeKind.FUNCTION)) {
